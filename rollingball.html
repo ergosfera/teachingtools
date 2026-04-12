@@ -415,17 +415,17 @@ function drawGraph() {
   function tx(t) { return padL + (t / tMax) * plotW; }
   function ty(x) { return padT + plotH - (x / xMax) * plotH; }
 
-  // Minor grid
-  gCtx.strokeStyle = '#ddd9d0'; gCtx.lineWidth = 0.5;
-  for (let t = 0; t <= tMax; t += 0.25) {
+  // Minor grid — t every 0.1 s, x every 10 cm
+  gCtx.strokeStyle = '#b8b4aa'; gCtx.lineWidth = 0.8;
+  for (let t = 0; t <= tMax + 0.001; t += 0.1) {
     gCtx.beginPath(); gCtx.moveTo(tx(t), padT); gCtx.lineTo(tx(t), padT + plotH); gCtx.stroke();
   }
   for (let x = 0; x <= xMax; x += 10) {
     gCtx.beginPath(); gCtx.moveTo(padL, ty(x)); gCtx.lineTo(padL + plotW, ty(x)); gCtx.stroke();
   }
 
-  // Major grid
-  gCtx.strokeStyle = '#c8c4bb'; gCtx.lineWidth = 0.8;
+  // Major grid — t every 1 s, x every 50 cm
+  gCtx.strokeStyle = '#7a7870'; gCtx.lineWidth = 1.5;
   for (let t = 0; t <= tMax; t++) {
     gCtx.beginPath(); gCtx.moveTo(tx(t), padT); gCtx.lineTo(tx(t), padT + plotH); gCtx.stroke();
   }
@@ -434,14 +434,14 @@ function drawGraph() {
   }
 
   // Axes
-  gCtx.strokeStyle = '#8a8278'; gCtx.lineWidth = 1.1;
+  gCtx.strokeStyle = '#3a3830'; gCtx.lineWidth = 1.8;
   gCtx.beginPath();
   gCtx.moveTo(padL, padT); gCtx.lineTo(padL, padT + plotH);
   gCtx.lineTo(padL + plotW, padT + plotH);
   gCtx.stroke();
 
   // Tick labels — lowercase
-  gCtx.fillStyle = '#8a8278'; gCtx.font = '8px JetBrains Mono, monospace';
+  gCtx.fillStyle = '#4a4840'; gCtx.font = '9px JetBrains Mono, monospace';
   gCtx.textAlign = 'center';
   for (let t = 0; t <= tMax; t++) gCtx.fillText(t, tx(t), padT + plotH + 11);
   gCtx.textAlign = 'right';
