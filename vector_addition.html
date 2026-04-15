@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Addition — Net Force</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #eef0f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 14px 20px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #334;
+      user-select: none;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #223355;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    p.sub {
+      font-size: 0.75rem;
+      color: #8899aa;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    /* ── Two-column layout ── */
+    #main-layout {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      max-width: 1200px;
+      align-items: flex-start;
+    }
+
+    /* ── LEFT COLUMN ── */
+    #left-col {
+      width: 30%;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Table card */
+    #table-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.09);
+      overflow: hidden;
+    }
+
+    #vec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    #vec-table thead tr {
+      background: #f0f2f9;
+    }
+
+    #vec-table th {
+      padding: 7px 5px;
+      font-weight: 700;
+      color: #4455aa;
+      text-align: center;
+      border-bottom: 1.5px solid #dde2ec;
+      font-size: 0.75rem;
+      letter-spacing: 0.3px;
+    }
+
+    #vec-table td {
+      padding: 5px 4px;
+      text-align: center;
+      border-bottom: 1px solid #eef0f6;
+      vertical-align: middle;
+    }
+
+    #vec-table tbody tr:last-child td { border-bottom: none; }
+
+    .col-dot {
+      width: 36px;
+    }
+
+    .dot-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-weight: 700;
+      font-size: 0.76rem;
+    }
+
+    .dot-circle {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .mag-input {
+      width: 52px;
+      padding: 3px 4px;
+      border: 1.5px solid #ccd;
+      border-radius: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      background: #fafafe;
+      color: #334;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .mag-input:focus {
+      border-color: #4477cc;
+      box-shadow: 0 0 0 2px rgba(68,119,204,0.18);
+    }
+
+    .ro-cell {
+      color: #556;
+      font-size: 0.77rem;
+      font-weight: 600;
+    }
+
+    /* Fnet row in tfoot */
+    #vec-table tfoot tr {
+      background: #1a2a4a;
+    }
+
+    #vec-table tfoot td {
+      color: #e8eeff;
+      font-weight: 700;
+      font-size: 0.76rem;
+      padding: 6px 4px;
+      border-bottom: none;
+    }
+
+    #fnet-row { display: none; }
+
+    /* Controls */
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: filter 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+    .btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.9); }
+    .btn:disabled { opacity: 0.25; cursor: default; transform: none !important; }
+
+    #btn-add    { background: #1e9e1e; color: #fff; }
+    #btn-remove { background: #e03000; color: #fff; }
+    #btn-fnet   { background: #1a2a4a; color: #e8eeff; }
+    #btn-reset  { background: #ccd0dd; color: #445; border: 1px solid #bbc; }
+
+    .hint {
+      font-size: 0.70rem;
+      color: #8899aa;
+      line-height: 1.8;
+      padding: 2px 0;
+    }
+
+    /* ── RIGHT COLUMN ── */
+    #right-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    canvas {
+      border-radius: 10px;
+      touch-action: none;
+      width: 100%;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      display: block;
+    }
+
+    #fnet-canvas {
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Vector Addition &mdash; Net Force</h1>
+<p class="sub">Add multiple force vectors and find the resultant</p>
+
+<div id="main-layout">
+
+  <!-- ══ LEFT COLUMN ══ -->
+  <div id="left-col">
+
+    <div id="table-card">
+      <table id="vec-table">
+        <thead>
+          <tr>
+            <th class="col-dot">&#11044;</th>
+            <th>|F|</th>
+            <th>&#952;&#176;</th>
+            <th>Fx</th>
+            <th>Fy</th>
+          </tr>
+        </thead>
+        <tbody id="vec-tbody">
+          <!-- rows injected by JS -->
+        </tbody>
+        <tfoot>
+          <tr id="fnet-row">
+            <td>&Sigma; Fnet</td>
+            <td id="fn-mag">—</td>
+            <td id="fn-ang">—</td>
+            <td id="fn-fx">—</td>
+            <td id="fn-fy">—</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div id="controls">
+      <button class="btn" id="btn-add">+ Add</button>
+      <button class="btn" id="btn-remove">&#8722; Remove</button>
+      <button class="btn" id="btn-fnet">Fnet data</button>
+      <button class="btn" id="btn-reset">&#8635; Reset</button>
+    </div>
+
+    <p class="hint">
+      &#9679; Drag a vector tip to rotate &nbsp;&bull;&nbsp; Edit |F| in the table to change magnitude &nbsp;&bull;&nbsp; Use <strong>+ Add</strong> to add vectors &nbsp;&bull;&nbsp; Toggle <strong>Fnet data</strong> to show net force
+    </p>
+
+  </div>
+
+  <!-- ══ RIGHT COLUMN ══ -->
+  <div id="right-col">
+    <!-- Fnet mini-panel -->
+    <canvas id="fnet-canvas" width="860" height="130"></canvas>
+    <!-- Main canvas -->
+    <canvas id="main-canvas" width="860" height="600"></canvas>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const COLORS = ['#e03000','#0088bb','#1e9e1e','#cc8800','#7755cc','#e0007a','#008866'];
+const MAX_VECTORS = 7;
+const GRID_SPACING = 40; // px
+
+// Canvas logical dimensions
+const MW = 860, MH = 600;  // main canvas
+const FW = 860, FH = 130;  // fnet panel
+
+const MOX = MW / 2, MOY = MH / 2;  // main canvas origin
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Each vector: { mag: number, angle: number (radians, math CCW from +x) }
+let vectors = [];
+
+// Drag state
+let dragIdx    = -1;   // index of vector being dragged
+let fnetVisible = false;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CANVAS SETUP
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const MC  = document.getElementById('main-canvas');
+const mctx = MC.getContext('2d');
+
+const FC  = document.getElementById('fnet-canvas');
+const fctx = FC.getContext('2d');
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MATH HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function toCanvasAngle(mathAngle) {
+  // math angle (CCW from +x) → canvas screen angle (CW from +x, atan2 coords)
+  return -mathAngle;
+}
+
+function angDeg(rad) {
+  // Convert radians to 0–360° display
+  let d = (rad * 180 / Math.PI) % 360;
+  if (d < 0) d += 360;
+  return d;
+}
+
+function computeFnet() {
+  let fx = 0, fy = 0;
+  for (const v of vectors) {
+    fx += v.mag * Math.cos(v.angle);
+    fy += v.mag * Math.sin(v.angle);
+  }
+  const mag = Math.sqrt(fx * fx + fy * fy);
+  const angle = Math.atan2(fy, fx);
+  return { fx, fy, mag, angle };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DRAW PRIMITIVES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function drawArrow(ctx, x1, y1, x2, y2, color, lineWidth, headSize) {
+  const dx = x2 - x1, dy = y2 - y1;
+  if (dx * dx + dy * dy < 4) return;
+  const a = Math.atan2(dy, dx);
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle   = color;
+  ctx.lineWidth   = lineWidth;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2 - headSize * 0.75 * Math.cos(a), y2 - headSize * 0.75 * Math.sin(a));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headSize * Math.cos(a - 0.42), y2 - headSize * Math.sin(a - 0.42));
+  ctx.lineTo(x2 - headSize * Math.cos(a + 0.42), y2 - headSize * Math.sin(a + 0.42));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function rightAngleMark(ctx, cornerX, cornerY, d1x, d1y, d2x, d2y, size, color) {
+  // d1, d2 are unit direction vectors of the two legs at the corner
+  const p1x = cornerX + size * d1x;
+  const p1y = cornerY + size * d1y;
+  const p2x = p1x + size * d2x;
+  const p2y = p1y + size * d2y;
+  const p3x = cornerX + size * d2x;
+  const p3y = cornerY + size * d2y;
+  ctx.save();
+  ctx.strokeStyle = color + 'aa';
+  ctx.lineWidth   = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(p1x, p1y);
+  ctx.lineTo(p2x, p2y);
+  ctx.lineTo(p3x, p3y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN CANVAS DRAWING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function computeScale() {
+  if (vectors.length === 0) return 60;
+  const maxMag = Math.max(...vectors.map(v => v.mag));
+  if (maxMag === 0) return 60;
+  const margin = 35;
+  return (Math.min(MW, MH) / 2 - margin) / maxMag;
+}
+
+function drawMainBg() {
+  const g = mctx.createLinearGradient(0, 0, 0, MH);
+  g.addColorStop(0, '#f9fafd');
+  g.addColorStop(1, '#f2f4fa');
+  mctx.fillStyle = g;
+  mctx.fillRect(0, 0, MW, MH);
+}
+
+function drawMainGrid() {
+  mctx.save();
+  mctx.strokeStyle = '#d8dcea';
+  mctx.lineWidth   = 1;
+  // vertical lines
+  for (let x = MOX % GRID_SPACING; x < MW; x += GRID_SPACING) {
+    mctx.beginPath(); mctx.moveTo(x, 0); mctx.lineTo(x, MH); mctx.stroke();
+  }
+  // horizontal lines
+  for (let y = MOY % GRID_SPACING; y < MH; y += GRID_SPACING) {
+    mctx.beginPath(); mctx.moveTo(0, y); mctx.lineTo(MW, y); mctx.stroke();
+  }
+  mctx.restore();
+}
+
+function drawMainAxes() {
+  const AXIS = Math.min(MW, MH) / 2 - 18;
+  mctx.save();
+
+  // x-axis
+  drawArrow(mctx, MOX - AXIS, MOY, MOX + AXIS, MOY, '#2a2a44', 1.8, 10);
+  // y-axis
+  drawArrow(mctx, MOX, MOY + AXIS, MOX, MOY - AXIS, '#2a2a44', 1.8, 10);
+
+  // Axis labels
+  mctx.font = 'italic bold 17px Georgia, serif';
+  mctx.fillStyle = '#4455aa';
+  mctx.textAlign = 'center';
+  mctx.textBaseline = 'middle';
+  mctx.fillText('x', MOX + AXIS + 18, MOY);
+  mctx.fillText('y', MOX, MOY - AXIS - 18);
+
+  // Origin dot
+  mctx.fillStyle = '#556';
+  mctx.beginPath();
+  mctx.arc(MOX, MOY, 4, 0, Math.PI * 2);
+  mctx.fill();
+
+  mctx.restore();
+}
+
+function drawSingleVector(idx, scale) {
+  const v     = vectors[idx];
+  const color = COLORS[idx % COLORS.length];
+  const label = 'F' + (idx + 1);
+
+  // Canvas displacement (math angle → screen coords: y flipped)
+  const vx = v.mag * scale * Math.cos(v.angle);
+  const vy = -v.mag * scale * Math.sin(v.angle);  // negative: canvas y is down
+
+  const tipX = MOX + vx;
+  const tipY = MOY + vy;
+
+  // Foot on x-axis: (MOX + vx, MOY)
+  const fxX = MOX + vx, fxY = MOY;
+  // Foot on y-axis: (MOX, MOY + vy)
+  const fyX = MOX,      fyY = MOY + vy;
+
+  // ── Component arrows (thin) ────────────────────────────────────────────────
+  if (Math.abs(vx) > 3) {
+    drawArrow(mctx, MOX, MOY, fxX, fxY, color + 'bb', 1.5, 8);
+  }
+  if (Math.abs(vy) > 3) {
+    drawArrow(mctx, MOX, MOY, fyX, fyY, color + 'bb', 1.5, 8);
+  }
+
+  // ── Dashed projection lines from tip to both feet ─────────────────────────
+  mctx.save();
+  mctx.strokeStyle = color + '88';
+  mctx.lineWidth   = 1.2;
+  mctx.setLineDash([6, 4]);
+  if (Math.abs(vx) > 3 && Math.abs(vy) > 3) {
+    mctx.beginPath(); mctx.moveTo(tipX, tipY); mctx.lineTo(fxX, fxY); mctx.stroke();
+    mctx.beginPath(); mctx.moveTo(tipX, tipY); mctx.lineTo(fyX, fyY); mctx.stroke();
+  }
+  mctx.setLineDash([]);
+  mctx.restore();
+
+  // ── Right-angle marks ─────────────────────────────────────────────────────
+  const SZ = 8;
+  const sx = Math.sign(vx) || 1;
+  const sy = Math.sign(vy) || 1;  // canvas sign of vy
+  const siny = Math.sign(v.mag * Math.sin(v.angle)) || 1;  // physics sign of vy
+
+  if (Math.abs(vx) > 16 && Math.abs(vy) > 16) {
+    // Foot on x-axis: corner at (fxX, fxY)
+    // d1 points from corner back toward origin along x: (-sx, 0)
+    // d2 points from corner toward tip along y: (0, sy)
+    rightAngleMark(mctx, fxX, fxY, -sx, 0, 0, sy, SZ, color);
+
+    // Foot on y-axis: corner at (fyX, fyY)
+    // d1 points from corner back toward origin along y: (0, -sy)
+    // d2 points from corner toward tip along x: (sx, 0)
+    rightAngleMark(mctx, fyX, fyY, 0, -sy, sx, 0, SZ, color);
+  }
+
+  // ── Angle arc: from +x axis to vector direction ───────────────────────────
+  const screenAngle = Math.atan2(vy, vx);  // angle in canvas coords
+  const arcR = 36 + idx * 6;               // stagger arcs so they don't overlap
+  const mathAngleDeg = angDeg(v.angle);
+
+  if (Math.abs(v.angle % (Math.PI * 2)) > 0.03) {
+    mctx.save();
+    mctx.strokeStyle = color + 'cc';
+    mctx.lineWidth   = 1.5;
+    // Always: arc(OX, OY, arcR, 0, screenAngle, true) per spec
+    mctx.beginPath();
+    mctx.arc(MOX, MOY, arcR, 0, screenAngle, true);
+    mctx.stroke();
+    mctx.restore();
+
+    // Label at arc bisector: angle/2 in math convention
+    const bisector = v.angle / 2;
+    const labelR   = arcR + 16;
+    const labelX   = MOX + labelR * Math.cos(bisector);
+    const labelY   = MOY - labelR * Math.sin(bisector);  // screen coords
+
+    mctx.save();
+    mctx.font      = 'bold 10px "Segoe UI", system-ui, sans-serif';
+    mctx.fillStyle = color;
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    mctx.fillText(mathAngleDeg.toFixed(1) + '°', labelX, labelY);
+    mctx.restore();
+  }
+
+  // ── Main thick vector arrow ───────────────────────────────────────────────
+  drawArrow(mctx, MOX, MOY, tipX, tipY, color, 3.2, 13);
+
+  // ── Tip drag handle (white-filled circle) ────────────────────────────────
+  mctx.save();
+  mctx.fillStyle   = '#fff';
+  mctx.strokeStyle = color;
+  mctx.lineWidth   = 2;
+  mctx.beginPath();
+  mctx.arc(tipX, tipY, 6, 0, Math.PI * 2);
+  mctx.fill();
+  mctx.stroke();
+  mctx.restore();
+
+  // ── Label at shaft midpoint, offset perpendicularly ───────────────────────
+  const midX = MOX + vx * 0.5;
+  const midY = MOY + vy * 0.5;
+  // Perpendicular to shaft direction
+  const shaftAngle = Math.atan2(vy, vx);
+  const perpX = -Math.sin(shaftAngle);
+  const perpY =  Math.cos(shaftAngle);
+  const perpOff = 16;
+  // Pick perpendicular side that goes "left" of the arrow direction
+  const lx = midX + perpX * perpOff;
+  const ly = midY + perpY * perpOff;
+
+  mctx.save();
+  mctx.font      = 'bold 12px "Segoe UI", system-ui, sans-serif';
+  mctx.fillStyle = color;
+  mctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  mctx.lineWidth   = 3;
+  mctx.textAlign   = 'center';
+  mctx.textBaseline = 'middle';
+  mctx.strokeText(label, lx, ly);
+  mctx.fillText(label, lx, ly);
+  mctx.restore();
+}
+
+function drawMain() {
+  mctx.clearRect(0, 0, MW, MH);
+  drawMainBg();
+  drawMainGrid();
+  drawMainAxes();
+
+  if (vectors.length === 0) {
+    mctx.save();
+    mctx.font = '15px "Segoe UI", system-ui, sans-serif';
+    mctx.fillStyle = '#aab';
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    mctx.fillText('Add vectors using the + Add button', MOX, MOY + 60);
+    mctx.restore();
+    return;
+  }
+
+  const scale = computeScale();
+
+  for (let i = 0; i < vectors.length; i++) {
+    drawSingleVector(i, scale);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FNET MINI-PANEL DRAWING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function drawFnetPanel() {
+  const ctx = fctx;
+
+  // Background
+  const g = ctx.createLinearGradient(0, 0, 0, FH);
+  g.addColorStop(0, '#f4f5fb');
+  g.addColorStop(1, '#eceef7');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, FW, FH, 8);
+  ctx.fill();
+
+  // Light grid
+  ctx.save();
+  ctx.strokeStyle = '#d8dcea';
+  ctx.lineWidth   = 0.8;
+  for (let x = 0; x < FW; x += GRID_SPACING) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, FH); ctx.stroke();
+  }
+  for (let y = 0; y < FH; y += GRID_SPACING) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(FW, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  const FOX = FW / 2;
+  const FOY = FH / 2 - 12;  // shift up slightly to leave room for text
+
+  // Reference axes
+  const FAXIS = Math.min(FW / 2 - 20, FOY - 4);
+  ctx.save();
+  ctx.strokeStyle = '#2a2a44';
+  ctx.lineWidth   = 1.2;
+  // x-axis
+  ctx.beginPath(); ctx.moveTo(FOX - FAXIS, FOY); ctx.lineTo(FOX + FAXIS, FOY); ctx.stroke();
+  // y-axis
+  ctx.beginPath(); ctx.moveTo(FOX, FOY + FAXIS); ctx.lineTo(FOX, FOY - FAXIS); ctx.stroke();
+  ctx.restore();
+
+  // Axis arrowheads and labels (small)
+  drawArrow(ctx, FOX - FAXIS, FOY, FOX + FAXIS, FOY, '#2a2a44', 1.2, 7);
+  drawArrow(ctx, FOX, FOY + FAXIS, FOX, FOY - FAXIS, '#2a2a44', 1.2, 7);
+
+  ctx.save();
+  ctx.font = 'italic bold 12px Georgia, serif';
+  ctx.fillStyle = '#4455aa';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('x', FOX + FAXIS + 12, FOY);
+  ctx.fillText('y', FOX, FOY - FAXIS - 12);
+  ctx.restore();
+
+  if (vectors.length === 0) {
+    ctx.save();
+    ctx.font = '13px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#aab';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Net force — add vectors to see result', FOX, FOY + 8);
+    ctx.restore();
+    // Bottom text line
+    ctx.save();
+    ctx.font = '11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#99aacc';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('|Fnet| = —    θ = —    Fnx = —    Fny = —', FW / 2, FH - 6);
+    ctx.restore();
+    return;
+  }
+
+  const fn = computeFnet();
+
+  // Scale Fnet arrow to fit in mini-panel
+  const maxDim = FAXIS - 12;
+  const fnScale = fn.mag > 0 ? Math.min(maxDim / fn.mag, 60) : 60;
+
+  const fnvx = fn.fx * fnScale;
+  const fnvy = -fn.fy * fnScale;  // canvas y flipped
+
+  // Component arrows (thin, dark navy)
+  const compColor = '#1a2a4a';
+  if (Math.abs(fnvx) > 3) {
+    drawArrow(ctx, FOX, FOY, FOX + fnvx, FOY, compColor + '88', 1.3, 6);
+  }
+  if (Math.abs(fnvy) > 3) {
+    drawArrow(ctx, FOX, FOY, FOX, FOY + fnvy, compColor + '88', 1.3, 6);
+  }
+
+  // Dashed projections from tip to feet
+  if (fn.mag > 0 && Math.abs(fnvx) > 3 && Math.abs(fnvy) > 3) {
+    ctx.save();
+    ctx.strokeStyle = compColor + '55';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(FOX + fnvx, FOY + fnvy); ctx.lineTo(FOX + fnvx, FOY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(FOX + fnvx, FOY + fnvy); ctx.lineTo(FOX, FOY + fnvy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // Main Fnet arrow
+  if (fn.mag > 0) {
+    drawArrow(ctx, FOX, FOY, FOX + fnvx, FOY + fnvy, '#1a2a4a', 2.8, 10);
+  }
+
+  // Bottom text line
+  const angDisplay = fn.mag > 0 ? angDeg(fn.angle).toFixed(1) + '°' : '—';
+  const magDisplay = fn.mag.toFixed(3);
+  const fxDisplay  = fn.fx.toFixed(3);
+  const fyDisplay  = fn.fy.toFixed(3);
+
+  ctx.save();
+  ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#1a2a4a';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(
+    `|Fnet| = ${magDisplay}    θ = ${angDisplay}    Fnx = ${fxDisplay}    Fny = ${fyDisplay}`,
+    FW / 2, FH - 5
+  );
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TABLE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function buildTable() {
+  const tbody = document.getElementById('vec-tbody');
+  tbody.innerHTML = '';
+
+  for (let i = 0; i < vectors.length; i++) {
+    const v     = vectors[i];
+    const color = COLORS[i % COLORS.length];
+    const label = 'F' + (i + 1);
+
+    const Fx = (v.mag * Math.cos(v.angle)).toFixed(3);
+    const Fy = (v.mag * Math.sin(v.angle)).toFixed(3);
+    const ang = angDeg(v.angle).toFixed(1);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-dot">
+        <div class="dot-label">
+          <span class="dot-circle" style="background:${color}"></span>
+          <span style="color:${color}">${label}</span>
+        </div>
+      </td>
+      <td>
+        <input class="mag-input" type="number" min="0.01" step="0.1"
+               data-idx="${i}" value="${v.mag.toFixed(2)}"
+               style="border-color:${color}88">
+      </td>
+      <td class="ro-cell" id="ang-${i}">${ang}</td>
+      <td class="ro-cell" id="fx-${i}">${Fx}</td>
+      <td class="ro-cell" id="fy-${i}">${Fy}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Attach magnitude input listeners
+  document.querySelectorAll('.mag-input').forEach(input => {
+    input.addEventListener('input', e => {
+      const idx = parseInt(e.target.dataset.idx);
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val) && val > 0) {
+        vectors[idx].mag = val;
+        updateCells(idx);
+        drawMain();
+        drawFnetPanel();
+        updateFnetRow();
+      }
+    });
+  });
+}
+
+function updateCells(idx) {
+  const v  = vectors[idx];
+  const Fx = (v.mag * Math.cos(v.angle)).toFixed(3);
+  const Fy = (v.mag * Math.sin(v.angle)).toFixed(3);
+  const ang = angDeg(v.angle).toFixed(1);
+
+  const angEl = document.getElementById('ang-' + idx);
+  const fxEl  = document.getElementById('fx-'  + idx);
+  const fyEl  = document.getElementById('fy-'  + idx);
+  if (angEl) angEl.textContent = ang;
+  if (fxEl)  fxEl.textContent  = Fx;
+  if (fyEl)  fyEl.textContent  = Fy;
+
+  // Only update magnitude input if it's not focused
+  const magEl = document.querySelector(`.mag-input[data-idx="${idx}"]`);
+  if (magEl && document.activeElement !== magEl) {
+    magEl.value = v.mag.toFixed(2);
+  }
+}
+
+function updateAllCells() {
+  for (let i = 0; i < vectors.length; i++) {
+    updateCells(i);
+  }
+}
+
+function updateFnetRow() {
+  const fn = computeFnet();
+  document.getElementById('fn-mag').textContent = fn.mag.toFixed(3);
+  document.getElementById('fn-ang').textContent = (fn.mag > 0 ? angDeg(fn.angle).toFixed(1) : '0.0') + '°';
+  document.getElementById('fn-fx').textContent  = fn.fx.toFixed(3);
+  document.getElementById('fn-fy').textContent  = fn.fy.toFixed(3);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DRAG INTERACTION ON MAIN CANVAS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function getTipPosition(idx) {
+  const v     = vectors[idx];
+  const scale = computeScale();
+  const vx    = v.mag * scale * Math.cos(v.angle);
+  const vy    = -v.mag * scale * Math.sin(v.angle);
+  return { x: MOX + vx, y: MOY + vy };
+}
+
+function hitTestTips(mx, my) {
+  const R2 = 16 * 16;
+  for (let i = vectors.length - 1; i >= 0; i--) {
+    const tip = getTipPosition(i);
+    const dx  = mx - tip.x;
+    const dy  = my - tip.y;
+    if (dx * dx + dy * dy <= R2) return i;
+  }
+  return -1;
+}
+
+function canvasXY(canvas, e, isTouch) {
+  const rect = canvas.getBoundingClientRect();
+  const src  = isTouch ? (e.touches[0] || e.changedTouches[0]) : e;
+  const logW = parseInt(canvas.getAttribute('width'));
+  const logH = parseInt(canvas.getAttribute('height'));
+  return {
+    x: (src.clientX - rect.left) * (logW / rect.width),
+    y: (src.clientY - rect.top)  * (logH / rect.height)
+  };
+}
+
+function updateCursorForPos(mx, my) {
+  if (dragIdx >= 0) return;
+  const hit = hitTestTips(mx, my);
+  MC.style.cursor = hit >= 0 ? 'grab' : 'default';
+}
+
+function onMainDown(mx, my) {
+  const hit = hitTestTips(mx, my);
+  if (hit >= 0) {
+    dragIdx = hit;
+    MC.style.cursor = 'grabbing';
+  }
+}
+
+function onMainMove(mx, my) {
+  if (dragIdx < 0) {
+    updateCursorForPos(mx, my);
+    return;
+  }
+  // Update angle from mouse position, keep magnitude fixed
+  const dx = mx - MOX;
+  const dy = my - MOY;
+  if (Math.sqrt(dx * dx + dy * dy) < 4) return;
+  // Convert canvas coords back to math angle
+  vectors[dragIdx].angle = Math.atan2(-dy, dx);  // -dy: canvas y is down
+  // Normalize to [0, 2π)
+  if (vectors[dragIdx].angle < 0) vectors[dragIdx].angle += 2 * Math.PI;
+
+  updateCells(dragIdx);
+  updateFnetRow();
+  drawMain();
+  drawFnetPanel();
+}
+
+function onMainUp() {
+  dragIdx = -1;
+  MC.style.cursor = 'default';
+}
+
+// Mouse events
+MC.addEventListener('mousedown',  e => { const p = canvasXY(MC, e); onMainDown(p.x, p.y); });
+MC.addEventListener('mousemove',  e => { const p = canvasXY(MC, e); onMainMove(p.x, p.y); });
+MC.addEventListener('mouseup',    ()  => onMainUp());
+MC.addEventListener('mouseleave', ()  => onMainUp());
+
+// Touch events
+MC.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const p = canvasXY(MC, e, true);
+  onMainDown(p.x, p.y);
+}, { passive: false });
+
+MC.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const p = canvasXY(MC, e, true);
+  onMainMove(p.x, p.y);
+}, { passive: false });
+
+MC.addEventListener('touchend', e => {
+  e.preventDefault();
+  onMainUp();
+}, { passive: false });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function updateButtons() {
+  document.getElementById('btn-add').disabled    = vectors.length >= MAX_VECTORS;
+  document.getElementById('btn-remove').disabled = vectors.length === 0;
+  document.getElementById('btn-fnet').textContent = fnetVisible ? 'Hide Fnet' : 'Fnet data';
+}
+
+document.getElementById('btn-add').addEventListener('click', () => {
+  if (vectors.length >= MAX_VECTORS) return;
+  // Default angles spread out evenly with some offset
+  const defaultAngles = [
+    Math.PI / 6,           // 30°
+    2 * Math.PI / 3,       // 120°
+    5 * Math.PI / 4,       // 225°
+    11 * Math.PI / 6,      // 330°
+    Math.PI / 2,           // 90°
+    7 * Math.PI / 6,       // 210°
+    Math.PI / 3            // 60°
+  ];
+  const angle = defaultAngles[vectors.length % defaultAngles.length];
+  vectors.push({ mag: 1.0, angle });
+  buildTable();
+  updateFnetRow();
+  updateButtons();
+  drawMain();
+  drawFnetPanel();
+});
+
+document.getElementById('btn-remove').addEventListener('click', () => {
+  if (vectors.length === 0) return;
+  vectors.pop();
+  buildTable();
+  updateFnetRow();
+  updateButtons();
+  drawMain();
+  drawFnetPanel();
+});
+
+document.getElementById('btn-fnet').addEventListener('click', () => {
+  fnetVisible = !fnetVisible;
+  document.getElementById('fnet-row').style.display = fnetVisible ? '' : 'none';
+  updateButtons();
+  if (fnetVisible) updateFnetRow();
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  vectors = [];
+  fnetVisible = false;
+  document.getElementById('fnet-row').style.display = 'none';
+  buildTable();
+  updateFnetRow();
+  updateButtons();
+  drawMain();
+  drawFnetPanel();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Start with 2 default vectors
+vectors = [
+  { mag: 3.0, angle: Math.PI / 6 },        // 30°
+  { mag: 2.0, angle: 2 * Math.PI / 3 }     // 120°
+];
+
+buildTable();
+updateFnetRow();
+updateButtons();
+drawMain();
+drawFnetPanel();
+</script>
+</body>
+</html>
