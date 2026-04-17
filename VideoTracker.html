@@ -65,9 +65,30 @@ select {
 /* ── MAIN ── */
 #main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
-/* ── VIDEO PANEL 70% ── */
-#video-panel {
+/* ── VIDEO COLUMN (video + controls below it) ── */
+#video-col {
     flex: 7;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* ── VIDEO CONTROLS BAR (under video) ── */
+#video-controls {
+    background: #16213e;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-top: 1px solid #0f3460;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+/* ── VIDEO PANEL ── */
+#video-panel {
+    flex: 1;
     position: relative;
     background: #000;
     display: flex;
@@ -170,6 +191,12 @@ thead th:first-child { text-align: left; }
 tbody td { padding: 2px 7px; text-align: right; border-bottom: 1px solid #1a1a2e; }
 tbody td:first-child { text-align: left; }
 tbody tr:hover { background: #131c2e; }
+.btn-del {
+    padding: 1px 5px; font-size: 10px; line-height: 1;
+    background: #2a1a1a; border: 1px solid #4a1a1a;
+    border-radius: 3px; color: #e94560; cursor: pointer;
+}
+.btn-del:hover { background: #e94560; color: #fff; }
 
 /* ── STATUS BAR ── */
 #status-bar {
@@ -205,62 +232,19 @@ tbody tr:hover { background: #131c2e; }
 </head>
 <body>
 
-<!-- ═══ TOOLBAR ═══ -->
+<!-- ═══ TOP TOOLBAR — analysis controls ═══ -->
 <div id="toolbar">
 
-  <!-- 1. FILE -->
-  <div class="tb-group">
-    <label class="tb-label">File</label>
-    <button onclick="document.getElementById('file-input').click()">&#128194; Load</button>
-    <input type="file" id="file-input" accept="video/*,.avi,.mpeg,.mpg,.wmv" style="display:none">
-  </div>
-  <div class="tb-sep"></div>
-
-  <!-- 2. PLAYBACK -->
-  <div class="tb-group">
-    <label class="tb-label">Playback</label>
-    <button id="btn-rewind" onclick="rewindVideo()" disabled title="Go to start (trim in)">&#9664;&#9664;</button>
-    <button id="btn-play-pause" class="btn-play" onclick="togglePlayback()" disabled>&#9654; Play</button>
-    <button id="btn-stop" onclick="stopPlayback()" disabled title="Stop">&#9632;</button>
-    <button id="btn-loop" onclick="toggleLoop()" disabled title="Loop playback">&#8635; Loop</button>
-  </div>
-  <div class="tb-group">
-    <input type="range" id="scrubber" min="0" max="100" value="0" step="1" disabled>
-  </div>
-  <div class="tb-sep"></div>
-
-  <!-- 3. FRAME NAVIGATION -->
-  <div class="tb-group">
-    <label class="tb-label">Frames</label>
-    <button id="btn-trim-s" onclick="setTrimStart()" disabled title="Set trim in to current frame">&#9664; In</button>
-    <input type="number" id="trim-s-in" value="0" min="0" step="1" style="width:48px" title="Trim start frame">
-    <button id="btn-trim-e" onclick="setTrimEnd()" disabled title="Set trim out to current frame">Out &#9654;</button>
-    <input type="number" id="trim-e-in" value="0" min="0" step="1" style="width:48px" title="Trim end frame">
-  </div>
-  <div class="tb-group">
-    <label class="tb-label">Step</label>
-    <input type="number" id="step-input" value="1" min="1" max="999" step="1" style="width:44px" title="Frames to advance after each tracked point">
-    <label class="tb-label">fr</label>
-  </div>
-  <div class="tb-sep"></div>
-
-  <!-- 4. VIDEO -->
-  <div class="tb-group">
-    <label class="tb-label">Video</label>
-    <button id="btn-rot-ccw" onclick="rotateVideo(-90)" disabled title="Rotate 90° counter-clockwise">&#8634; 90°</button>
-    <button id="btn-rot-cw"  onclick="rotateVideo(+90)" disabled title="Rotate 90° clockwise">90° &#8635;</button>
-    <label class="tb-label">FPS</label>
-    <input type="number" id="fps-input" value="30" min="1" max="240" step="0.001" style="width:52px">
-  </div>
-  <div class="tb-sep"></div>
-
-  <!-- 5. ANALYSIS MODE + COORDINATE SYSTEM -->
+  <!-- Mode -->
   <div class="tb-group">
     <label class="tb-label">Mode</label>
-    <button id="btn-setup" class="active" onclick="setMode('setup')">&#9881; Setup</button>
-    <button id="btn-cal"   onclick="setMode('calibration')" disabled>&#128207; Cal</button>
+    <button id="btn-setup" class="active" onclick="setMode('setup')" title="Drag the white dot to place the coordinate origin; set axis angle below">&#9881; Origin</button>
+    <button id="btn-cal"   onclick="setMode('calibration')" disabled>&#128207; Calibrate</button>
     <button id="btn-track" onclick="setMode('tracking')"    disabled>&#127919; Track</button>
   </div>
+  <div class="tb-sep"></div>
+
+  <!-- Coordinate system -->
   <div class="tb-group">
     <label class="tb-label">Axis&#176;</label>
     <input type="range" id="angle-slider" min="-180" max="180" value="0" style="width:70px">
@@ -272,16 +256,16 @@ tbody tr:hover { background: #131c2e; }
   </div>
   <div class="tb-sep"></div>
 
-  <!-- 6. DATA -->
+  <!-- Data -->
   <div class="tb-group">
     <label class="tb-label">Data</label>
-    <button id="btn-undo"   onclick="undoLastPoint()" disabled title="Undo last point">&#8630; Undo</button>
+    <button id="btn-undo"   onclick="undoLastPoint()" disabled title="Remove last tracked point">&#8630; Undo</button>
     <button id="btn-clear"  onclick="clearTracking()"  disabled title="Clear all points">&#128465; Clear</button>
     <button id="btn-export" onclick="openCSVModal()"   disabled title="Export CSV">&#11015; CSV</button>
   </div>
   <div class="tb-sep"></div>
 
-  <!-- 7. OVERLAY -->
+  <!-- Overlay -->
   <div class="tb-group">
     <label class="tb-label">Show</label>
     <button id="btn-axes" class="active" onclick="toggleAxes()" title="Show/hide coordinate axes">Axes</button>
@@ -293,27 +277,81 @@ tbody tr:hover { background: #131c2e; }
 <!-- ═══ MAIN ═══ -->
 <div id="main">
 
-  <!-- Left: video 70% -->
-  <div id="video-panel"
-       ondragover="event.preventDefault();this.style.outline='2px solid #e94560'"
-       ondragleave="this.style.outline=''"
-       ondrop="handleDrop(event)">
-    <div id="canvas-container">
-      <canvas id="video-canvas"></canvas>
-      <canvas id="overlay-canvas"></canvas>
+  <!-- Left column: video + controls below it -->
+  <div id="video-col">
+
+    <div id="video-panel"
+         ondragover="event.preventDefault();this.style.outline='2px solid #e94560'"
+         ondragleave="this.style.outline=''"
+         ondrop="handleDrop(event)">
+      <div id="canvas-container">
+        <canvas id="video-canvas"></canvas>
+        <canvas id="overlay-canvas"></canvas>
+      </div>
+      <div id="drop-hint">
+        <div class="icon">&#127909;</div>
+        <div class="text">Load or drop a video file</div>
+        <div class="sub">MP4, MOV, WebM work best &nbsp;·&nbsp; AVI/MPEG need conversion</div>
+      </div>
+      <div id="format-error">
+        <div class="fe-icon">⚠️</div>
+        <div class="fe-title">Format Not Supported</div>
+        <div class="fe-msg" id="fe-msg">This video format cannot be played by your browser.<br>Please convert it to <strong>MP4 (H.264)</strong> or <strong>WebM</strong>.<br><br>Free tools: <strong>HandBrake</strong> (desktop app) &nbsp;·&nbsp; <strong>CloudConvert.com</strong> (browser)</div>
+        <div class="fe-close" onclick="dismissFormatError()">✕ Dismiss and try another file</div>
+      </div>
     </div>
-    <div id="drop-hint">
-      <div class="icon">&#127909;</div>
-      <div class="text">Load or drop a video file</div>
-      <div class="sub">MP4, MOV, WebM work best &nbsp;·&nbsp; AVI/MPEG need conversion</div>
-    </div>
-    <div id="format-error">
-      <div class="fe-icon">⚠️</div>
-      <div class="fe-title">Format Not Supported</div>
-      <div class="fe-msg" id="fe-msg">This video format cannot be played by your browser.<br>Please convert it to <strong>MP4 (H.264)</strong> or <strong>WebM</strong>.<br><br>Free tools: <strong>HandBrake</strong> (desktop app) &nbsp;·&nbsp; <strong>CloudConvert.com</strong> (browser)</div>
-      <div class="fe-close" onclick="dismissFormatError()">✕ Dismiss and try another file</div>
-    </div>
-  </div>
+
+    <!-- Video controls bar -->
+    <div id="video-controls">
+
+      <!-- File -->
+      <div class="tb-group">
+        <label class="tb-label">File</label>
+        <button onclick="document.getElementById('file-input').click()">&#128194; Load</button>
+        <input type="file" id="file-input" accept="video/*,.avi,.mpeg,.mpg,.wmv" style="display:none">
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Playback -->
+      <div class="tb-group">
+        <label class="tb-label">Playback</label>
+        <button id="btn-rewind" onclick="rewindVideo()" disabled title="Go to trim start">&#9664;&#9664;</button>
+        <button id="btn-play-pause" class="btn-play" onclick="togglePlayback()" disabled>&#9654; Play</button>
+        <button id="btn-stop" onclick="stopPlayback()" disabled title="Stop">&#9632;</button>
+        <button id="btn-loop" onclick="toggleLoop()" disabled title="Loop playback">&#8635; Loop</button>
+      </div>
+      <div class="tb-group">
+        <input type="range" id="scrubber" min="0" max="100" value="0" step="1" disabled>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Frame navigation -->
+      <div class="tb-group">
+        <label class="tb-label">Frames</label>
+        <button id="btn-trim-s" onclick="setTrimStart()" disabled title="Set trim in to current frame">&#9664; In</button>
+        <input type="number" id="trim-s-in" value="0" min="0" step="1" style="width:48px" title="Trim start frame">
+        <button id="btn-trim-e" onclick="setTrimEnd()" disabled title="Set trim out to current frame">Out &#9654;</button>
+        <input type="number" id="trim-e-in" value="0" min="0" step="1" style="width:48px" title="Trim end frame">
+      </div>
+      <div class="tb-group">
+        <label class="tb-label">Step</label>
+        <input type="number" id="step-input" value="1" min="1" max="999" step="1" style="width:44px" title="Frames to advance after each tracked point">
+        <label class="tb-label">fr</label>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Video setup -->
+      <div class="tb-group">
+        <label class="tb-label">Video</label>
+        <button id="btn-rot-ccw" onclick="rotateVideo(-90)" disabled title="Rotate 90° counter-clockwise">&#8634; 90°</button>
+        <button id="btn-rot-cw"  onclick="rotateVideo(+90)" disabled title="Rotate 90° clockwise">90° &#8635;</button>
+        <label class="tb-label">FPS</label>
+        <input type="number" id="fps-input" value="30" min="1" max="240" step="0.001" style="width:52px">
+      </div>
+
+    </div><!-- /video-controls -->
+
+  </div><!-- /video-col -->
 
   <!-- Right: graphs + table 30% -->
   <div id="right-panel">
@@ -362,6 +400,7 @@ tbody tr:hover { background: #131c2e; }
             <th>t (s)</th>
             <th id="th-x" class="col-x">X</th>
             <th id="th-y" class="col-y">Y</th>
+            <th></th>
           </tr></thead>
           <tbody id="data-tbody"></tbody>
         </table>
@@ -457,7 +496,6 @@ const S = {
     showCalOverlay: true,
 
     loop: false,
-    hoverPointIdx: -1,
     stepFrames: 1,
 };
 
@@ -826,28 +864,7 @@ ocan.addEventListener('mousemove', e => {
     if (S.mode === 'setup' && S.dragging) {
         S.origin = { x: p.x, y: p.y };
         drawOverlay();
-        return;
     }
-    if (S.mode === 'tracking') {
-        const prev = S.hoverPointIdx;
-        S.hoverPointIdx = S.points.findIndex(pt => dist2(p, {x:pt.cx, y:pt.cy}) < 12);
-        ocan.style.cursor = S.hoverPointIdx >= 0 ? 'pointer' : '';
-        if (S.hoverPointIdx !== prev) drawOverlay();
-    }
-});
-
-ocan.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    if (S.mode !== 'tracking' || !S.points.length) return;
-    const p = canvasPos(e);
-    const idx = S.points.findIndex(pt => dist2(p, {x:pt.cx, y:pt.cy}) < 12);
-    if (idx < 0) return;
-    S.points.splice(idx, 1);
-    S.hoverPointIdx = -1;
-    if (!S.points.length)
-        ['btn-undo','btn-clear','btn-export'].forEach(id =>
-            document.getElementById(id).disabled = true);
-    drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
 });
 
 ocan.addEventListener('mousedown', e => {
@@ -891,6 +908,14 @@ function addTrackPoint(cp) {
         document.getElementById(id).disabled = false);
     drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
     seekTo(S.frameIndex + S.stepFrames);
+}
+
+function deletePoint(i) {
+    S.points.splice(i, 1);
+    if (!S.points.length)
+        ['btn-undo','btn-clear','btn-export'].forEach(id =>
+            document.getElementById(id).disabled = true);
+    drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
 }
 
 function undoLastPoint() {
@@ -1101,15 +1126,10 @@ function drawTrackPoints() {
             octx.strokeStyle = 'rgba(255,215,0,0.45)'; octx.lineWidth = 1.5;
             octx.beginPath(); octx.moveTo(prev.cx, prev.cy); octx.lineTo(p.cx, p.cy); octx.stroke();
         }
-        const isHover = (i === S.hoverPointIdx);
-        octx.fillStyle = isHover ? '#ff4444' : '#ffd700';
-        octx.beginPath(); octx.arc(p.cx, p.cy, isHover ? 6 : 4, 0, Math.PI*2); octx.fill();
+        octx.fillStyle = '#ffd700';
+        octx.beginPath(); octx.arc(p.cx, p.cy, 4, 0, Math.PI*2); octx.fill();
         octx.strokeStyle = '#fff'; octx.lineWidth = 1; octx.stroke();
-        if (isHover) {
-            octx.fillStyle='#fff'; octx.font='10px sans-serif';
-            octx.textAlign='left'; octx.textBaseline='bottom';
-            octx.fillText('right-click to delete', p.cx+8, p.cy-3);
-        } else if (i === 0 || i === S.points.length-1) {
+        if (i === 0 || i === S.points.length-1) {
             octx.fillStyle='#fff'; octx.font='10px sans-serif';
             octx.textAlign='left'; octx.textBaseline='bottom';
             octx.fillText(i+1, p.cx+5, p.cy-3);
@@ -1338,7 +1358,8 @@ function updateDataTable() {
             `<td>${i+1}</td>` +
             `<td>${p.time.toFixed(3)}</td>` +
             `<td class="col-x${!S.showGraphX?' col-hidden':''}">${p.wx.toFixed(3)}</td>` +
-            `<td class="col-y${!S.showGraphY?' col-hidden':''}">${p.wy.toFixed(3)}</td>`;
+            `<td class="col-y${!S.showGraphY?' col-hidden':''}">${p.wy.toFixed(3)}</td>` +
+            `<td><button class="btn-del" onclick="deletePoint(${i})" title="Delete this point">✕</button></td>`;
         tbody.appendChild(tr);
     });
     const ds = document.getElementById('data-scroll');
