@@ -121,14 +121,38 @@ select {
 }
 .graph-section:last-child { border-bottom: none; }
 .graph-section-header {
-    padding: 3px 10px; font-size: 11px; color: #aaa;
+    padding: 3px 7px; font-size: 11px; color: #aaa;
     flex-shrink: 0; background: #16213e;
     border-bottom: 1px solid #0f3460;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 5px;
 }
 .graph-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .graph-wrap { flex: 1; min-height: 0; position: relative; }
 .graph-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Graph visibility + fit controls */
+.graph-section-header input[type=checkbox] {
+    cursor: pointer; accent-color: #4fc3f7; flex-shrink: 0;
+}
+.fit-sel {
+    font-size: 10px; padding: 1px 3px;
+    border: 1px solid #1a2a4a; border-radius: 3px;
+    background: #0a0a1a; color: #99aabb;
+    margin-left: auto; flex-shrink: 0;
+}
+.graph-section.hidden { display: none; }
+
+/* Table column visibility */
+.col-x, .col-y { transition: none; }
+.col-hidden { display: none; }
+
+/* CSV modal checkboxes */
+.csv-col-list { display: flex; flex-direction: column; gap: 8px; }
+.csv-col-list label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #ccc; cursor: pointer;
+}
+.csv-col-list input[type=checkbox] { accent-color: #4fc3f7; width: 14px; height: 14px; cursor: pointer; }
 
 #table-section {
     flex: 1; min-height: 0;
@@ -254,7 +278,15 @@ tbody tr:hover { background: #131c2e; }
   <div class="tb-group">
     <button id="btn-undo"   onclick="undoLastPoint()" disabled>&#8630; Undo</button>
     <button id="btn-clear"  onclick="clearTracking()"  disabled>&#128465; Clear</button>
-    <button id="btn-export" onclick="exportCSV()"      disabled>&#11015; CSV</button>
+    <button id="btn-export" onclick="openCSVModal()"   disabled>&#11015; CSV</button>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Overlay toggles -->
+  <div class="tb-group">
+    <label class="tb-label">Show:</label>
+    <button id="btn-axes" class="active" onclick="toggleAxes()" title="Show/hide coordinate axes">Axes</button>
+    <button id="btn-cal-overlay" class="active" onclick="toggleCalOverlay()" title="Show/hide calibration markers">Cal</button>
   </div>
 
 </div>
@@ -288,9 +320,15 @@ tbody tr:hover { background: #131c2e; }
   <div id="right-panel">
 
     <!-- X vs t -->
-    <div class="graph-section">
+    <div class="graph-section" id="graph-x-section">
       <div class="graph-section-header">
+        <input type="checkbox" id="chk-graph-x" checked title="Show X graph" onchange="toggleGraph('x')">
         <div class="graph-dot" style="background:#e94560"></div>X position vs. Time
+        <select class="fit-sel" id="fit-x-sel" onchange="setFitType('x', this.value)" title="Best-fit line">
+          <option value="none">No fit</option>
+          <option value="linear">Linear fit</option>
+          <option value="quadratic">Quadratic fit</option>
+        </select>
       </div>
       <div class="graph-wrap" id="graph-x-wrap">
         <canvas id="graph-x-canvas"></canvas>
@@ -298,9 +336,15 @@ tbody tr:hover { background: #131c2e; }
     </div>
 
     <!-- Y vs t -->
-    <div class="graph-section">
+    <div class="graph-section" id="graph-y-section">
       <div class="graph-section-header">
+        <input type="checkbox" id="chk-graph-y" checked title="Show Y graph" onchange="toggleGraph('y')">
         <div class="graph-dot" style="background:#4fc3f7"></div>Y position vs. Time
+        <select class="fit-sel" id="fit-y-sel" onchange="setFitType('y', this.value)" title="Best-fit line">
+          <option value="none">No fit</option>
+          <option value="linear">Linear fit</option>
+          <option value="quadratic">Quadratic fit</option>
+        </select>
       </div>
       <div class="graph-wrap" id="graph-y-wrap">
         <canvas id="graph-y-canvas"></canvas>
@@ -314,7 +358,12 @@ tbody tr:hover { background: #131c2e; }
       </div>
       <div id="data-scroll">
         <table>
-          <thead><tr><th>#</th><th>t (s)</th><th id="th-x">X</th><th id="th-y">Y</th></tr></thead>
+          <thead><tr>
+            <th>#</th>
+            <th>t (s)</th>
+            <th id="th-x" class="col-x">X</th>
+            <th id="th-y" class="col-y">Y</th>
+          </tr></thead>
           <tbody id="data-tbody"></tbody>
         </table>
       </div>
@@ -342,6 +391,23 @@ tbody tr:hover { background: #131c2e; }
     <div class="modal-buttons">
       <button onclick="cancelCalibration()" style="background:#222">Cancel</button>
       <button onclick="confirmCalibration()" style="background:#0f3460">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CSV COLUMN PICKER MODAL ═══ -->
+<div id="csv-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:100;align-items:center;justify-content:center;">
+  <div id="modal-box" style="background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:24px 28px;min-width:260px;display:flex;flex-direction:column;gap:14px;">
+    <h4 style="font-size:15px;color:#eee;">&#11015; Export CSV — choose columns</h4>
+    <div class="csv-col-list">
+      <label><input type="checkbox" id="csv-col-frame" checked> Frame #</label>
+      <label><input type="checkbox" id="csv-col-time"  checked> Time (s)</label>
+      <label><input type="checkbox" id="csv-col-x"     checked> X position</label>
+      <label><input type="checkbox" id="csv-col-y"     checked> Y position</label>
+    </div>
+    <div class="modal-buttons">
+      <button onclick="closeCSVModal()" style="background:#222">Cancel</button>
+      <button onclick="confirmExportCSV()" style="background:#0f3460">Export</button>
     </div>
   </div>
 </div>
@@ -382,6 +448,14 @@ const S = {
     lastCursorPos: null,
 
     CW: 640, CH: 480,
+
+    showGraphX: true,
+    showGraphY: true,
+    fitTypeX: 'none',
+    fitTypeY: 'none',
+
+    showAxes: true,
+    showCalOverlay: true,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -419,7 +493,6 @@ function loadFile(file) {
     formatErr.style.display = 'none';
     video._fileExt = file.name.split('.').pop().toLowerCase();
 
-    // Clean up old listeners
     video.removeEventListener('error', onVideoError);
     video.removeEventListener('loadedmetadata', initVideo);
 
@@ -794,14 +867,51 @@ function clearTracking() {
     drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
 }
 
-function exportCSV() {
-    const hdr  = `frame,time_s,x_${S.unit},y_${S.unit}\n`;
-    const rows = S.points.map(p =>
-        `${p.frame},${p.time.toFixed(4)},${p.wx.toFixed(4)},${p.wy.toFixed(4)}`).join('\n');
+function openCSVModal() {
+    document.getElementById('csv-modal-overlay').style.display = 'flex';
+}
+function closeCSVModal() {
+    document.getElementById('csv-modal-overlay').style.display = 'none';
+}
+function confirmExportCSV() {
+    const useFrame = document.getElementById('csv-col-frame').checked;
+    const useTime  = document.getElementById('csv-col-time').checked;
+    const useX     = document.getElementById('csv-col-x').checked;
+    const useY     = document.getElementById('csv-col-y').checked;
+
+    const hdrs = [];
+    if (useFrame) hdrs.push('frame');
+    if (useTime)  hdrs.push('time_s');
+    if (useX)     hdrs.push(`x_${S.unit}`);
+    if (useY)     hdrs.push(`y_${S.unit}`);
+    if (!hdrs.length) { alert('Select at least one column.'); return; }
+
+    const rows = S.points.map(p => {
+        const cols = [];
+        if (useFrame) cols.push(p.frame);
+        if (useTime)  cols.push(p.time.toFixed(4));
+        if (useX)     cols.push(p.wx.toFixed(4));
+        if (useY)     cols.push(p.wy.toFixed(4));
+        return cols.join(',');
+    });
+
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([hdr + rows], { type: 'text/csv' }));
+    a.href = URL.createObjectURL(new Blob([hdrs.join(',') + '\n' + rows.join('\n')], { type: 'text/csv' }));
     a.download = 'tracking_data.csv';
     a.click();
+    closeCSVModal();
+}
+
+function toggleAxes() {
+    S.showAxes = !S.showAxes;
+    document.getElementById('btn-axes').classList.toggle('active', S.showAxes);
+    drawOverlay();
+}
+
+function toggleCalOverlay() {
+    S.showCalOverlay = !S.showCalOverlay;
+    document.getElementById('btn-cal-overlay').classList.toggle('active', S.showCalOverlay);
+    drawOverlay();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -839,8 +949,8 @@ document.getElementById('modal-input').addEventListener('keydown', e => {
 // ═══════════════════════════════════════════════════════
 function drawOverlay() {
     octx.clearRect(0, 0, S.CW, S.CH);
-    drawAxes();
-    if (S.mode === 'calibration' || S.calPts.length) drawCalibration();
+    if (S.showAxes) drawAxes();
+    if (S.showCalOverlay && (S.mode === 'calibration' || S.calPts.length)) drawCalibration();
     drawTrackPoints();
 }
 
@@ -867,8 +977,6 @@ function drawAxes() {
     octx.font = 'bold 14px sans-serif'; octx.textAlign = 'center'; octx.textBaseline = 'middle';
     octx.fillStyle = 'rgba(233,69,96,0.85)'; octx.fillText('X', lx.x, lx.y);
     octx.fillStyle = 'rgba(79,195,247,0.85)'; octx.fillText('Y', ly.x, ly.y);
-
-    drawTicks();
 }
 
 function drawTicks() {
@@ -961,9 +1069,76 @@ function drawTrackPoints() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  GRAPHS (separate X and Y)
+//  REGRESSION
 // ═══════════════════════════════════════════════════════
-function drawGraphSingle(ctx, can, axis) {
+function linearRegression(xs, ys) {
+    const n = xs.length;
+    if (n < 2) return null;
+    const sx  = xs.reduce((a,b) => a+b, 0);
+    const sy  = ys.reduce((a,b) => a+b, 0);
+    const sxx = xs.reduce((a,x) => a+x*x, 0);
+    const sxy = xs.reduce((a,x,i) => a+x*ys[i], 0);
+    const den = n*sxx - sx*sx;
+    if (Math.abs(den) < 1e-14) return null;
+    const b = (n*sxy - sx*sy) / den;
+    const a = (sy - b*sx) / n;
+    return { a, b, label: `y = ${fmtCoef(b)}t ${b>=0?'+':''} ${fmtNum(a)}`, fn: t => a + b*t };
+}
+
+function quadraticRegression(xs, ys) {
+    const n = xs.length;
+    if (n < 3) return null;
+    let s1=0, s2=0, s3=0, s4=0, sy=0, sxy=0, sx2y=0;
+    xs.forEach((x,i) => {
+        const y=ys[i];
+        s1+=x; s2+=x*x; s3+=x*x*x; s4+=x*x*x*x;
+        sy+=y; sxy+=x*y; sx2y+=x*x*y;
+    });
+    const A = [[n,s1,s2],[s1,s2,s3],[s2,s3,s4]];
+    const B = [sy, sxy, sx2y];
+    const sol = solve3x3(A, B);
+    if (!sol) return null;
+    const [a, b, c] = sol;
+    const sign1 = b>=0 ? '+' : '';
+    const sign2 = c>=0 ? '+' : '';
+    return {
+        a, b, c,
+        label: `y = ${fmtCoef(c)}t² ${sign1}${fmtCoef(b)}t ${sign2}${fmtNum(a)}`,
+        fn: t => a + b*t + c*t*t
+    };
+}
+
+function solve3x3(A, B) {
+    const M = A.map((row, i) => [...row, B[i]]);
+    for (let col = 0; col < 3; col++) {
+        let maxRow = col;
+        for (let row = col+1; row < 3; row++)
+            if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
+        [M[col], M[maxRow]] = [M[maxRow], M[col]];
+        if (Math.abs(M[col][col]) < 1e-14) return null;
+        for (let row = col+1; row < 3; row++) {
+            const f = M[row][col] / M[col][col];
+            for (let j = col; j <= 3; j++) M[row][j] -= f * M[col][j];
+        }
+    }
+    const x = [0, 0, 0];
+    for (let i = 2; i >= 0; i--) {
+        x[i] = M[i][3];
+        for (let j = i+1; j < 3; j++) x[i] -= M[i][j] * x[j];
+        x[i] /= M[i][i];
+    }
+    return x;
+}
+
+function fmtCoef(v) {
+    if (Math.abs(v) >= 10000 || (Math.abs(v) < 0.001 && v !== 0)) return v.toExponential(2);
+    return parseFloat(v.toPrecision(4)) + '';
+}
+
+// ═══════════════════════════════════════════════════════
+//  GRAPHS
+// ═══════════════════════════════════════════════════════
+function drawGraphSingle(ctx, can, axis, fitType) {
     const W = can.width, H = can.height;
     if (!W || !H) return;
     const pad = { t:14, r:10, b:28, l:44 };
@@ -1032,26 +1207,79 @@ function drawGraphSingle(ctx, can, axis) {
     ctx.fillText(axis === 'x' ? `X (${S.unit})` : `Y (${S.unit})`, 0, 0);
     ctx.restore();
 
-    // Line
-    if (pts.length > 1) {
-        ctx.strokeStyle = color; ctx.lineWidth = 2;
-        ctx.beginPath();
-        pts.forEach((p, i) => {
-            const x = tx(p.time), y = ty(vals[i]);
-            i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-        });
-        ctx.stroke();
-    }
-
-    // Dots
+    // Data dots
     ctx.fillStyle = color;
     pts.forEach((p, i) => {
         ctx.beginPath(); ctx.arc(tx(p.time), ty(vals[i]), 3, 0, Math.PI*2); ctx.fill();
     });
+
+    // Best-fit line
+    if (fitType !== 'none' && pts.length >= 2) {
+        let fit = null;
+        if (fitType === 'linear')    fit = linearRegression(times, vals);
+        if (fitType === 'quadratic') fit = quadraticRegression(times, vals);
+
+        if (fit) {
+            // Draw fit curve
+            const steps = Math.max(60, pw);
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(pad.l, pad.t, pw, ph);
+            ctx.clip();
+            ctx.strokeStyle = 'rgba(255,220,80,0.9)';
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([5, 3]);
+            for (let i = 0; i <= steps; i++) {
+                const t = t0 + (t1-t0)*i/steps;
+                const v = fit.fn(t);
+                const px = tx(t), py = ty(v);
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+
+            // Equation label
+            ctx.font = '9px monospace';
+            ctx.fillStyle = 'rgba(255,220,80,0.95)';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            // measure to right-align if needed
+            const lblW = ctx.measureText(fit.label).width;
+            const lblX = Math.min(pad.l + 3, W - lblW - 4);
+            ctx.fillText(fit.label, pad.l + 3, pad.t + 2);
+        }
+    }
 }
 
-function drawGraphX() { drawGraphSingle(gxctx, gxcan, 'x'); }
-function drawGraphY() { drawGraphSingle(gyctx, gycan, 'y'); }
+function drawGraphX() { drawGraphSingle(gxctx, gxcan, 'x', S.fitTypeX); }
+function drawGraphY() { drawGraphSingle(gyctx, gycan, 'y', S.fitTypeY); }
+
+// ═══════════════════════════════════════════════════════
+//  GRAPH VISIBILITY + FIT TYPE CONTROLS
+// ═══════════════════════════════════════════════════════
+function toggleGraph(axis) {
+    if (axis === 'x') {
+        S.showGraphX = document.getElementById('chk-graph-x').checked;
+        document.getElementById('graph-x-section').classList.toggle('hidden', !S.showGraphX);
+    } else {
+        S.showGraphY = document.getElementById('chk-graph-y').checked;
+        document.getElementById('graph-y-section').classList.toggle('hidden', !S.showGraphY);
+    }
+    updateTableColumns();
+}
+
+function setFitType(axis, val) {
+    if (axis === 'x') { S.fitTypeX = val; drawGraphX(); }
+    else               { S.fitTypeY = val; drawGraphY(); }
+}
+
+function updateTableColumns() {
+    const xHide = !S.showGraphX;
+    const yHide = !S.showGraphY;
+    document.querySelectorAll('.col-x').forEach(el => el.classList.toggle('col-hidden', xHide));
+    document.querySelectorAll('.col-y').forEach(el => el.classList.toggle('col-hidden', yHide));
+}
 
 // ═══════════════════════════════════════════════════════
 //  DATA TABLE
@@ -1061,12 +1289,17 @@ function updateDataTable() {
     tbody.innerHTML = '';
     S.points.forEach((p, i) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${i+1}</td><td>${p.time.toFixed(3)}</td><td>${p.wx.toFixed(3)}</td><td>${p.wy.toFixed(3)}</td>`;
+        tr.innerHTML =
+            `<td>${i+1}</td>` +
+            `<td>${p.time.toFixed(3)}</td>` +
+            `<td class="col-x${!S.showGraphX?' col-hidden':''}">${p.wx.toFixed(3)}</td>` +
+            `<td class="col-y${!S.showGraphY?' col-hidden':''}">${p.wy.toFixed(3)}</td>`;
         tbody.appendChild(tr);
     });
     const ds = document.getElementById('data-scroll');
     ds.scrollTop = ds.scrollHeight;
 }
+
 function updateTableHeader() {
     document.getElementById('th-x').textContent = `X (${S.unit})`;
     document.getElementById('th-y').textContent = `Y (${S.unit})`;
