@@ -217,8 +217,10 @@ tbody tr:hover { background: #131c2e; }
 
   <!-- Playback -->
   <div class="tb-group">
+    <button id="btn-rewind" onclick="rewindVideo()" disabled title="Go to start">&#9664;&#9664; Rew</button>
     <button id="btn-play-pause" class="btn-play" onclick="togglePlayback()" disabled>&#9654; Play</button>
     <button id="btn-stop" onclick="stopPlayback()" disabled>&#9646;&#9646; Stop</button>
+    <button id="btn-loop" onclick="toggleLoop()" disabled title="Loop playback">&#8635; Loop</button>
   </div>
   <div class="tb-group">
     <input type="range" id="scrubber" min="0" max="100" value="0" step="1" disabled>
@@ -270,7 +272,7 @@ tbody tr:hover { background: #131c2e; }
   <!-- Unit -->
   <div class="tb-group">
     <label class="tb-label">Unit:</label>
-    <select id="unit-sel"><option value="cm">cm</option><option value="m">m</option></select>
+    <select id="unit-sel"><option value="cm">cm</option><option value="m" selected>m</option></select>
   </div>
   <div class="tb-sep"></div>
 
@@ -436,7 +438,7 @@ const S = {
     origin: { x: 200, y: 200 },
     angle: 0,
     scale: 1,
-    unit: 'cm',
+    unit: 'm',
     calibrated: false,
 
     calPts: [],
@@ -456,6 +458,9 @@ const S = {
 
     showAxes: true,
     showCalOverlay: true,
+
+    loop: false,
+    hoverPointIdx: -1,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -542,7 +547,7 @@ function initVideo() {
     resizeVideoCanvas();
     dropHint.style.display = 'none';
 
-    ['btn-play-pause','btn-stop','btn-trim-s','btn-trim-e',
+    ['btn-play-pause','btn-stop','btn-rewind','btn-loop','btn-trim-s','btn-trim-e',
      'btn-rot-ccw','btn-rot-cw','btn-cal','btn-track'].forEach(id => {
         document.getElementById(id).disabled = false;
     });
@@ -625,6 +630,11 @@ function playbackLoop() {
     if (!S.isPlaying) return;
     const t = video.currentTime;
     if (t >= S.trimEnd / S.fps || video.ended) {
+        if (S.loop) {
+            video.currentTime = S.trimStart / S.fps;
+            rafId = requestAnimationFrame(playbackLoop);
+            return;
+        }
         video.pause();
         S.isPlaying = false;
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
@@ -668,6 +678,17 @@ function stopPlayback() {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     updatePlayBtn();
     seekTo(S.trimStart);
+}
+
+function rewindVideo() {
+    if (!S.videoLoaded) return;
+    pausePlayback();
+    seekTo(S.trimStart);
+}
+
+function toggleLoop() {
+    S.loop = !S.loop;
+    document.getElementById('btn-loop').classList.toggle('active', S.loop);
 }
 
 function updatePlayBtn() {
@@ -803,7 +824,28 @@ ocan.addEventListener('mousemove', e => {
     if (S.mode === 'setup' && S.dragging) {
         S.origin = { x: p.x, y: p.y };
         drawOverlay();
+        return;
     }
+    if (S.mode === 'tracking') {
+        const prev = S.hoverPointIdx;
+        S.hoverPointIdx = S.points.findIndex(pt => dist2(p, {x:pt.cx, y:pt.cy}) < 12);
+        ocan.style.cursor = S.hoverPointIdx >= 0 ? 'pointer' : '';
+        if (S.hoverPointIdx !== prev) drawOverlay();
+    }
+});
+
+ocan.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (S.mode !== 'tracking' || !S.points.length) return;
+    const p = canvasPos(e);
+    const idx = S.points.findIndex(pt => dist2(p, {x:pt.cx, y:pt.cy}) < 12);
+    if (idx < 0) return;
+    S.points.splice(idx, 1);
+    S.hoverPointIdx = -1;
+    if (!S.points.length)
+        ['btn-undo','btn-clear','btn-export'].forEach(id =>
+            document.getElementById(id).disabled = true);
+    drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
 });
 
 ocan.addEventListener('mousedown', e => {
@@ -1057,10 +1099,15 @@ function drawTrackPoints() {
             octx.strokeStyle = 'rgba(255,215,0,0.45)'; octx.lineWidth = 1.5;
             octx.beginPath(); octx.moveTo(prev.cx, prev.cy); octx.lineTo(p.cx, p.cy); octx.stroke();
         }
-        octx.fillStyle = '#ffd700';
-        octx.beginPath(); octx.arc(p.cx, p.cy, 4, 0, Math.PI*2); octx.fill();
+        const isHover = (i === S.hoverPointIdx);
+        octx.fillStyle = isHover ? '#ff4444' : '#ffd700';
+        octx.beginPath(); octx.arc(p.cx, p.cy, isHover ? 6 : 4, 0, Math.PI*2); octx.fill();
         octx.strokeStyle = '#fff'; octx.lineWidth = 1; octx.stroke();
-        if (i === 0 || i === S.points.length-1) {
+        if (isHover) {
+            octx.fillStyle='#fff'; octx.font='10px sans-serif';
+            octx.textAlign='left'; octx.textBaseline='bottom';
+            octx.fillText('right-click to delete', p.cx+8, p.cy-3);
+        } else if (i === 0 || i === S.points.length-1) {
             octx.fillStyle='#fff'; octx.font='10px sans-serif';
             octx.textAlign='left'; octx.textBaseline='bottom';
             octx.fillText(i+1, p.cx+5, p.cy-3);
@@ -1082,7 +1129,7 @@ function linearRegression(xs, ys) {
     if (Math.abs(den) < 1e-14) return null;
     const b = (n*sxy - sx*sy) / den;
     const a = (sy - b*sx) / n;
-    return { a, b, label: `y = ${fmtCoef(b)}t ${b>=0?'+':''} ${fmtNum(a)}`, fn: t => a + b*t };
+    return { a, b, lines: [`slope = ${fmtCoef(b)}`, `intercept = ${fmtCoef(a)}`], fn: t => a + b*t };
 }
 
 function quadraticRegression(xs, ys) {
@@ -1103,7 +1150,7 @@ function quadraticRegression(xs, ys) {
     const sign2 = c>=0 ? '+' : '';
     return {
         a, b, c,
-        label: `y = ${fmtCoef(c)}t² ${sign1}${fmtCoef(b)}t ${sign2}${fmtNum(a)}`,
+        lines: [`a (t²) = ${fmtCoef(c)}`, `b (t) = ${fmtCoef(b)}`, `c (cst) = ${fmtCoef(a)}`],
         fn: t => a + b*t + c*t*t
     };
 }
@@ -1239,15 +1286,14 @@ function drawGraphSingle(ctx, can, axis, fitType) {
             ctx.setLineDash([]);
             ctx.restore();
 
-            // Equation label
+            // Coefficient labels
             ctx.font = '9px monospace';
             ctx.fillStyle = 'rgba(255,220,80,0.95)';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
-            // measure to right-align if needed
-            const lblW = ctx.measureText(fit.label).width;
-            const lblX = Math.min(pad.l + 3, W - lblW - 4);
-            ctx.fillText(fit.label, pad.l + 3, pad.t + 2);
+            fit.lines.forEach((line, li) => {
+                ctx.fillText(line, pad.l + 3, pad.t + 2 + li * 11);
+            });
         }
     }
 }
