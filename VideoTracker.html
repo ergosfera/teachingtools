@@ -208,18 +208,20 @@ tbody tr:hover { background: #131c2e; }
 <!-- ═══ TOOLBAR ═══ -->
 <div id="toolbar">
 
-  <!-- Load -->
+  <!-- 1. FILE -->
   <div class="tb-group">
+    <label class="tb-label">File</label>
     <button onclick="document.getElementById('file-input').click()">&#128194; Load</button>
     <input type="file" id="file-input" accept="video/*,.avi,.mpeg,.mpg,.wmv" style="display:none">
   </div>
   <div class="tb-sep"></div>
 
-  <!-- Playback -->
+  <!-- 2. PLAYBACK -->
   <div class="tb-group">
-    <button id="btn-rewind" onclick="rewindVideo()" disabled title="Go to start">&#9664;&#9664; Rew</button>
+    <label class="tb-label">Playback</label>
+    <button id="btn-rewind" onclick="rewindVideo()" disabled title="Go to start (trim in)">&#9664;&#9664;</button>
     <button id="btn-play-pause" class="btn-play" onclick="togglePlayback()" disabled>&#9654; Play</button>
-    <button id="btn-stop" onclick="stopPlayback()" disabled>&#9646;&#9646; Stop</button>
+    <button id="btn-stop" onclick="stopPlayback()" disabled title="Stop">&#9632;</button>
     <button id="btn-loop" onclick="toggleLoop()" disabled title="Loop playback">&#8635; Loop</button>
   </div>
   <div class="tb-group">
@@ -227,66 +229,61 @@ tbody tr:hover { background: #131c2e; }
   </div>
   <div class="tb-sep"></div>
 
-  <!-- Trim -->
+  <!-- 3. FRAME NAVIGATION -->
   <div class="tb-group">
-    <label class="tb-label">Trim:</label>
-    <button id="btn-trim-s" onclick="setTrimStart()" disabled title="Set start to current frame">&#9664; In</button>
-    <input type="number" id="trim-s-in" value="0" min="0" step="1" style="width:52px" title="Start frame">
-    <button id="btn-trim-e" onclick="setTrimEnd()" disabled title="Set end to current frame">Out &#9654;</button>
-    <input type="number" id="trim-e-in" value="0" min="0" step="1" style="width:52px" title="End frame">
+    <label class="tb-label">Frames</label>
+    <button id="btn-trim-s" onclick="setTrimStart()" disabled title="Set trim in to current frame">&#9664; In</button>
+    <input type="number" id="trim-s-in" value="0" min="0" step="1" style="width:48px" title="Trim start frame">
+    <button id="btn-trim-e" onclick="setTrimEnd()" disabled title="Set trim out to current frame">Out &#9654;</button>
+    <input type="number" id="trim-e-in" value="0" min="0" step="1" style="width:48px" title="Trim end frame">
+  </div>
+  <div class="tb-group">
+    <label class="tb-label">Step</label>
+    <input type="number" id="step-input" value="1" min="1" max="999" step="1" style="width:44px" title="Frames to advance after each tracked point">
+    <label class="tb-label">fr</label>
   </div>
   <div class="tb-sep"></div>
 
-  <!-- Frame rotation -->
+  <!-- 4. VIDEO -->
   <div class="tb-group">
-    <label class="tb-label">Rotate:</label>
-    <button id="btn-rot-ccw" onclick="rotateVideo(-90)" disabled title="90° counter-clockwise">&#8634; 90°</button>
-    <button id="btn-rot-cw"  onclick="rotateVideo(+90)" disabled title="90° clockwise">90° &#8635;</button>
+    <label class="tb-label">Video</label>
+    <button id="btn-rot-ccw" onclick="rotateVideo(-90)" disabled title="Rotate 90° counter-clockwise">&#8634; 90°</button>
+    <button id="btn-rot-cw"  onclick="rotateVideo(+90)" disabled title="Rotate 90° clockwise">90° &#8635;</button>
+    <label class="tb-label">FPS</label>
+    <input type="number" id="fps-input" value="30" min="1" max="240" step="0.001" style="width:52px">
   </div>
   <div class="tb-sep"></div>
 
-  <!-- FPS -->
+  <!-- 5. ANALYSIS MODE + COORDINATE SYSTEM -->
   <div class="tb-group">
-    <label class="tb-label">FPS:</label>
-    <input type="number" id="fps-input" value="30" min="1" max="240" step="0.001">
-  </div>
-  <div class="tb-sep"></div>
-
-  <!-- Mode -->
-  <div class="tb-group">
+    <label class="tb-label">Mode</label>
     <button id="btn-setup" class="active" onclick="setMode('setup')">&#9881; Setup</button>
-    <button id="btn-cal"   onclick="setMode('calibration')" disabled>&#128207; Calibrate</button>
+    <button id="btn-cal"   onclick="setMode('calibration')" disabled>&#128207; Cal</button>
     <button id="btn-track" onclick="setMode('tracking')"    disabled>&#127919; Track</button>
   </div>
-  <div class="tb-sep"></div>
-
-  <!-- Axis angle -->
   <div class="tb-group">
-    <label class="tb-label">Axis:</label>
-    <input type="range" id="angle-slider" min="-180" max="180" value="0" style="width:80px">
-    <input type="number" id="angle-num" value="0" min="-180" max="180" step="0.5" style="width:52px">
-    <label class="tb-label">&#176;</label>
+    <label class="tb-label">Axis&#176;</label>
+    <input type="range" id="angle-slider" min="-180" max="180" value="0" style="width:70px">
+    <input type="number" id="angle-num" value="0" min="-180" max="180" step="0.5" style="width:48px">
   </div>
-  <div class="tb-sep"></div>
-
-  <!-- Unit -->
   <div class="tb-group">
-    <label class="tb-label">Unit:</label>
+    <label class="tb-label">Unit</label>
     <select id="unit-sel"><option value="cm">cm</option><option value="m" selected>m</option></select>
   </div>
   <div class="tb-sep"></div>
 
-  <!-- Edit -->
+  <!-- 6. DATA -->
   <div class="tb-group">
-    <button id="btn-undo"   onclick="undoLastPoint()" disabled>&#8630; Undo</button>
-    <button id="btn-clear"  onclick="clearTracking()"  disabled>&#128465; Clear</button>
-    <button id="btn-export" onclick="openCSVModal()"   disabled>&#11015; CSV</button>
+    <label class="tb-label">Data</label>
+    <button id="btn-undo"   onclick="undoLastPoint()" disabled title="Undo last point">&#8630; Undo</button>
+    <button id="btn-clear"  onclick="clearTracking()"  disabled title="Clear all points">&#128465; Clear</button>
+    <button id="btn-export" onclick="openCSVModal()"   disabled title="Export CSV">&#11015; CSV</button>
   </div>
   <div class="tb-sep"></div>
 
-  <!-- Overlay toggles -->
+  <!-- 7. OVERLAY -->
   <div class="tb-group">
-    <label class="tb-label">Show:</label>
+    <label class="tb-label">Show</label>
     <button id="btn-axes" class="active" onclick="toggleAxes()" title="Show/hide coordinate axes">Axes</button>
     <button id="btn-cal-overlay" class="active" onclick="toggleCalOverlay()" title="Show/hide calibration markers">Cal</button>
   </div>
@@ -461,6 +458,7 @@ const S = {
 
     loop: false,
     hoverPointIdx: -1,
+    stepFrames: 1,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -762,6 +760,10 @@ document.getElementById('angle-num').addEventListener('change', e => {
     S.angle = deg * Math.PI / 180;
     drawOverlay();
 });
+document.getElementById('step-input').addEventListener('change', e => {
+    S.stepFrames = Math.max(1, parseInt(e.target.value) || 1);
+    e.target.value = S.stepFrames;
+});
 document.getElementById('unit-sel').addEventListener('change', e => {
     S.unit = e.target.value;
     updateTableHeader();
@@ -888,7 +890,7 @@ function addTrackPoint(cp) {
     ['btn-undo','btn-clear','btn-export'].forEach(id =>
         document.getElementById(id).disabled = false);
     drawOverlay(); drawGraphX(); drawGraphY(); updateDataTable(); updateStatus();
-    seekTo(S.frameIndex + 1);
+    seekTo(S.frameIndex + S.stepFrames);
 }
 
 function undoLastPoint() {
@@ -1232,9 +1234,10 @@ function drawGraphSingle(ctx, can, axis, fitType) {
         ctx.setLineDash([]);
     }
 
-    // Border
-    ctx.strokeStyle = '#334'; ctx.lineWidth = 1;
-    ctx.strokeRect(pad.l, pad.t, pw, ph);
+    // Axis lines (prominent, no full border frame)
+    ctx.strokeStyle = '#8899aa'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
 
     // Tick labels
     ctx.fillStyle = '#667'; ctx.font = '9px sans-serif';
@@ -1267,15 +1270,12 @@ function drawGraphSingle(ctx, can, axis, fitType) {
         if (fitType === 'quadratic') fit = quadraticRegression(times, vals);
 
         if (fit) {
-            // Draw fit curve
+            // Draw fit curve (dashed, no clipping frame)
             const steps = Math.max(60, pw);
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(pad.l, pad.t, pw, ph);
-            ctx.clip();
             ctx.strokeStyle = 'rgba(255,220,80,0.9)';
             ctx.lineWidth = 1.8;
             ctx.setLineDash([5, 3]);
+            ctx.beginPath();
             for (let i = 0; i <= steps; i++) {
                 const t = t0 + (t1-t0)*i/steps;
                 const v = fit.fn(t);
@@ -1284,7 +1284,6 @@ function drawGraphSingle(ctx, can, axis, fitType) {
             }
             ctx.stroke();
             ctx.setLineDash([]);
-            ctx.restore();
 
             // Coefficient labels
             ctx.font = '9px monospace';
