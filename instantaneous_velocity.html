@@ -203,6 +203,10 @@ canvas.chart { display: block; width: 100%; height: 100%; }
   <div class="graph-half">
     <div class="graph-header">
       <span class="graph-title">x vs t</span>
+      <label style="display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="fit-toggle-xt"> best fit
+      </label>
+      <span id="fit-info-xt" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"></span>
     </div>
     <div class="graph-wrap" id="xt-wrap">
       <canvas id="xt-cv" class="chart"></canvas>
@@ -215,7 +219,7 @@ canvas.chart { display: block; width: 100%; height: 100%; }
       <label style="display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="fit-toggle"> best fit
       </label>
-      <span id="fit-info"></span>
+      <span id="fit-info" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"></span>
     </div>
     <div class="graph-wrap" id="vt-wrap">
       <canvas id="vt-cv" class="chart"></canvas>
@@ -228,7 +232,7 @@ canvas.chart { display: block; width: 100%; height: 100%; }
 let rawData = []; // [{t, x}]
 let diffs   = []; // [{dt, dx}]
 let vels    = []; // [{t, v}]
-let showFit = false;
+let showFit = false, showFitXt = false;
 
 // ── Compute ─────────────────────────────────────────────────
 function recompute() {
@@ -492,14 +496,25 @@ function linFit(xs, ys) {
 function drawCharts() {
   sizeCv(xtCv); sizeCv(vtCv);
 
+  const fitXt = showFitXt && rawData.length >= 2
+    ? linFit(rawData.map(d => d.t), rawData.map(d => d.x))
+    : null;
+
   drawChart(
     xtCv,
     rawData.map(d => d.t),
     rawData.map(d => d.x),
     't', 'x',
     '#1858a8',
-    null
+    fitXt
   );
+
+  const fiXt = document.getElementById('fit-info-xt');
+  if (fitXt) {
+    fiXt.innerHTML = `<span>a = ${parseFloat(fitXt.a.toPrecision(4))}</span><span>b = ${parseFloat(fitXt.b.toPrecision(4))}</span>`;
+  } else {
+    fiXt.innerHTML = '';
+  }
 
   const fit = showFit && vels.length >= 2
     ? linFit(vels.map(v => v.t), vels.map(v => v.v))
@@ -516,15 +531,16 @@ function drawCharts() {
 
   const fi = document.getElementById('fit-info');
   if (fit) {
-    const a = parseFloat(fit.a.toPrecision(4));
-    const b = parseFloat(fit.b.toPrecision(4));
-    const sign = b >= 0 ? '+' : '−';
-    fi.textContent = `v = ${a} ${sign} ${Math.abs(b)} · t`;
+    fi.innerHTML = `<span>a = ${parseFloat(fit.a.toPrecision(4))}</span><span>b = ${parseFloat(fit.b.toPrecision(4))}</span>`;
   } else {
-    fi.textContent = '';
+    fi.innerHTML = '';
   }
 }
 
+document.getElementById('fit-toggle-xt').addEventListener('change', e => {
+  showFitXt = e.target.checked;
+  drawCharts();
+});
 document.getElementById('fit-toggle').addEventListener('change', e => {
   showFit = e.target.checked;
   drawCharts();
@@ -532,16 +548,6 @@ document.getElementById('fit-toggle').addEventListener('change', e => {
 
 window.addEventListener('resize', drawCharts);
 
-// ── Sample data (uniformly accelerated: x = t²) ────────────
-rawData = [
-  { t: 0.0, x: 0.00 },
-  { t: 0.5, x: 0.25 },
-  { t: 1.0, x: 1.00 },
-  { t: 1.5, x: 2.25 },
-  { t: 2.0, x: 4.00 },
-  { t: 2.5, x: 6.25 },
-  { t: 3.0, x: 9.00 },
-];
 renderRaw();
 recompute();
 </script>
