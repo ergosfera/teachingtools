@@ -156,6 +156,19 @@
 
   .add-row-btn:hover { background: #eaf4fb; color: #2980b9; border-color: #2980b9; }
 
+  .table-hint {
+    font-size: 0.68em;
+    color: #bbb;
+    margin-top: 5px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.01em;
+  }
+
+  #data-table tbody td input.expr-error {
+    background: #fef0ee !important;
+    border-color: #e74c3c !important;
+  }
+
   .csv-btn {
     padding: 6px 9px;
     background: #f8f9fa;
@@ -356,6 +369,7 @@
         <button class="add-row-btn" id="add-row-btn">+ Add row</button>
         <button class="csv-btn"     id="csv-btn">⬆ CSV</button>
       </div>
+      <div class="table-hint">= 2+3 &nbsp; 10/4 &nbsp; 2^3 &nbsp; sqrt(9) &nbsp; (1+2)*5</div>
       <input type="file" id="csv-file" accept=".csv,.tsv,.txt" style="display:none">
     </div>
 
@@ -500,10 +514,10 @@ function renderTable() {
   data.forEach((d, i) => {
     const tr = document.createElement('tr');
     tr.innerHTML =
-      `<td><input type="number" step="any" inputmode="decimal"
+      `<td><input type="text" inputmode="decimal"
                   data-row="${i}" data-col="x" placeholder="—"
                   value="${d.x !== null ? fmtNum(d.x) : ''}"></td>
-       <td><input type="number" step="any" inputmode="decimal"
+       <td><input type="text" inputmode="decimal"
                   data-row="${i}" data-col="y" placeholder="—"
                   value="${d.y !== null ? fmtNum(d.y) : ''}"></td>
        <td class="del-cell">
@@ -514,10 +528,15 @@ function renderTable() {
 
   tbody.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', () => {
-      const val = parseFloat(inp.value);
-      data[+inp.dataset.row][inp.dataset.col] = isNaN(val) ? null : val;
-      draw();
+      // Clear error state while typing; live-update only for plain numbers
+      inp.classList.remove('expr-error');
+      const val = Number(inp.value.trim());
+      if (inp.value.trim() !== '' && !isNaN(val)) {
+        data[+inp.dataset.row][inp.dataset.col] = val;
+        draw();
+      }
     });
+    inp.addEventListener('blur', () => commitCell(inp));
     inp.addEventListener('keydown', e => handleTableKey(e, inp));
   });
 
@@ -537,15 +556,18 @@ function handleTableKey(e, inp) {
   switch (e.key) {
     case 'Enter':
       e.preventDefault();
+      commitCell(inp);
       if (row + 1 >= data.length) { data.push({ x: null, y: null }); renderTable(); }
       focusCell(row + 1, col);
       break;
     case 'ArrowDown':
       e.preventDefault();
+      commitCell(inp);
       if (row + 1 < data.length) focusCell(row + 1, col);
       break;
     case 'ArrowUp':
       e.preventDefault();
+      commitCell(inp);
       if (row > 0) focusCell(row - 1, col);
       break;
     case 'ArrowRight':
@@ -575,6 +597,47 @@ function writeRow(i) {
 }
 
 function fmtNum(v) { return String(parseFloat(v.toPrecision(5))); }
+
+// ─────────────────────────────────────────────
+//  Expression evaluator
+// ─────────────────────────────────────────────
+function evalCell(raw) {
+  const s = raw.trim();
+  if (!s) return null;
+  // Plain number fast path
+  const n = Number(s);
+  if (!isNaN(n)) return n;
+  // Transform to JS
+  let expr = s
+    .replace(/\^/g, '**')
+    .replace(/sqrt\s*\(/gi, 'Math.sqrt(');
+  // Safety: after removing known tokens, only math chars should remain
+  const check = expr.replace(/Math\.sqrt/g, '');
+  if (/[^0-9+\-*/.()\s]/.test(check)) return NaN;
+  try {
+    const result = Function('"use strict"; return (' + expr + ')')();
+    return (typeof result === 'number' && isFinite(result)) ? result : NaN;
+  } catch (_) { return NaN; }
+}
+
+function commitCell(inp) {
+  const row = +inp.dataset.row, col = inp.dataset.col;
+  const raw = inp.value;
+  if (raw.trim() === '') {
+    data[row][col] = null;
+    inp.classList.remove('expr-error');
+    draw(); return;
+  }
+  const val = evalCell(raw);
+  if (val !== null && !isNaN(val)) {
+    data[row][col] = val;
+    inp.value = fmtNum(val);
+    inp.classList.remove('expr-error');
+  } else {
+    inp.classList.add('expr-error');
+  }
+  draw();
+}
 
 // ─────────────────────────────────────────────
 //  CSV import
