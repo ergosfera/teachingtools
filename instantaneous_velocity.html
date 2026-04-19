@@ -112,9 +112,15 @@ input.cell-in.err { color: var(--red); background: #fee2e2; border-radius: 3px; 
   font-size: 0.72rem; font-weight: 700; color: var(--muted);
   letter-spacing: .09em; text-transform: uppercase; flex: 1;
 }
-#fit-info {
+#fit-info, #fit-info-xt {
   font-size: 0.7rem; color: var(--green);
   font-family: 'Courier New', monospace; white-space: nowrap;
+  display: flex; flex-direction: row; gap: 10px; flex-shrink: 0;
+}
+.fit-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.68rem; color: var(--muted); cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
 }
 .graph-wrap {
   flex: 1; min-height: 0; position: relative; background: var(--surface); padding: 4px;
@@ -203,10 +209,10 @@ canvas.chart { display: block; width: 100%; height: 100%; }
   <div class="graph-half">
     <div class="graph-header">
       <span class="graph-title">x vs t</span>
-      <label style="display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);cursor:pointer;white-space:nowrap">
+      <label class="fit-label">
         <input type="checkbox" id="fit-toggle-xt"> best fit
       </label>
-      <span id="fit-info-xt" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"></span>
+      <span id="fit-info-xt"></span>
     </div>
     <div class="graph-wrap" id="xt-wrap">
       <canvas id="xt-cv" class="chart"></canvas>
@@ -216,10 +222,10 @@ canvas.chart { display: block; width: 100%; height: 100%; }
   <div class="graph-half">
     <div class="graph-header">
       <span class="graph-title">v vs t</span>
-      <label style="display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);cursor:pointer;white-space:nowrap">
+      <label class="fit-label">
         <input type="checkbox" id="fit-toggle"> best fit
       </label>
-      <span id="fit-info" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"></span>
+      <span id="fit-info"></span>
     </div>
     <div class="graph-wrap" id="vt-wrap">
       <canvas id="vt-cv" class="chart"></canvas>
@@ -271,7 +277,7 @@ function renderRaw() {
   });
 
   tb.querySelectorAll('.cell-in').forEach(inp => {
-    inp.addEventListener('change', e => {
+    inp.addEventListener('input', e => {
       const i = +e.target.dataset.i, c = e.target.dataset.c;
       const v = parseFloat(e.target.value);
       if (isNaN(v)) { e.target.classList.add('err'); return; }
@@ -458,18 +464,6 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   ctx.fillText(yLbl, 0, 0);
   ctx.restore();
 
-  // best fit line
-  if (fitLine) {
-    const { a, b } = fitLine;
-    ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(toX(xR.min), toY(a + b * xR.min));
-    ctx.lineTo(toX(xR.max), toY(a + b * xR.max));
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
   // scatter points
   ctx.fillStyle = ptColor;
   xs.forEach((x, i) => {
@@ -477,20 +471,35 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
     ctx.arc(toX(x), toY(ys[i]), 5, 0, Math.PI * 2);
     ctx.fill();
   });
+
+  // best fit line (drawn on top of points)
+  if (fitLine) {
+    const { a, b } = fitLine;
+    ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(toX(xR.min), toY(a * xR.min + b));
+    ctx.lineTo(toX(xR.max), toY(a * xR.max + b));
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
 }
 
-function linFit(xs, ys) {
-  const n = xs.length;
+function linFit(ts, xs) {
+  const n = ts.length;
   if (n < 2) return null;
-  const sx  = xs.reduce((a, b) => a + b, 0);
-  const sy  = ys.reduce((a, b) => a + b, 0);
-  const sxx = xs.reduce((a, x) => a + x * x, 0);
-  const sxy = xs.reduce((a, x, i) => a + x * ys[i], 0);
-  const det = n * sxx - sx * sx;
+  let sumT = 0, sumX = 0, sumTT = 0, sumTX = 0;
+  for (let i = 0; i < n; i++) {
+    sumT  += ts[i];
+    sumX  += xs[i];
+    sumTT += ts[i] * ts[i];
+    sumTX += ts[i] * xs[i];
+  }
+  const det = n * sumTT - sumT * sumT;
   if (!det) return null;
-  const slope = (n * sxy - sx * sy) / det;
-  const intercept = (sy - slope * sx) / n;
-  return { a: intercept, b: slope };
+  const a = (n * sumTX - sumT * sumX) / det;   // slope
+  const b = (sumX - a * sumT) / n;             // intercept
+  return { a, b };
 }
 
 function drawCharts() {
