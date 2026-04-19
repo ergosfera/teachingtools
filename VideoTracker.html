@@ -161,7 +161,8 @@ select {
     background: #0a0a1a; color: #99aabb;
     margin-left: auto; flex-shrink: 0;
 }
-.graph-section.hidden { display: none; }
+.graph-section.hidden { flex: 0 0 auto; }
+.graph-section.hidden .graph-wrap { display: none; }
 
 /* Table column visibility */
 .col-x, .col-y { transition: none; }
