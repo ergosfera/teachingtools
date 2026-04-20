@@ -184,7 +184,7 @@
 <body>
 
   <div id="top-bar">
-    <label for="interval-input">Beep every</label>
+    <label for="interval-input">Bip every</label>
     <input id="interval-input" type="number" min="1" max="3600" value="1" />
     <label for="interval-input">seconds</label>
   </div>
@@ -205,10 +205,10 @@
   <div id="pips-section">
     <table>
       <thead>
-        <tr><th>beep #</th><th>Time</th><th>Laps</th></tr>
+        <tr><th>Bip #</th><th>Time</th><th>Laps</th></tr>
       </thead>
       <tbody id="pips-body">
-        <tr id="empty-row"><td colspan="3" id="empty-msg">No beeps yet</td></tr>
+        <tr id="empty-row"><td colspan="3" id="empty-msg">No bips yet</td></tr>
       </tbody>
     </table>
   </div>
@@ -222,7 +222,7 @@
       return audioCtx;
     } catch(e) { return null; }
   }
-  function playbeep() {
+  function playBip() {
     try {
       const ctx = getAudioCtx();
       if (!ctx) return;
@@ -285,7 +285,7 @@
   }
 
   function addPip(ms) {
-    playbeep();
+    playBip();
     flashClock();
     pipCount++;
     lastPipMs = ms;
@@ -295,13 +295,13 @@
 
     const tr = document.createElement('tr');
     tr.className    = 'new-pip';
-    tr.dataset.beep  = pipCount;
+    tr.dataset.bip  = pipCount;
     tr.dataset.time = fmt(ms, false);
     tr.dataset.ms   = ms;
 
     const tdNum  = document.createElement('td');
     tdNum.className   = 'pip-num';
-    tdNum.textContent = `beep ${pipCount}`;
+    tdNum.textContent = `Bip ${pipCount}`;
 
     const tdTime = document.createElement('td');
     tdTime.className   = 'pip-time';
@@ -339,12 +339,12 @@
 
   // ── Export ─────────────────────────────────────────────────────────────────
   btnExport.addEventListener('click', () => {
-    const rows = pipsBody.querySelectorAll('tr[data-beep]');
+    const rows = pipsBody.querySelectorAll('tr[data-bip]');
     if (!rows.length) return;
-    let csv = 'beep,t(s),lap(unit)\n';
+    let csv = 'Bip,t(s),lap(unit)\n';
     rows.forEach(tr => {
       const seconds = (parseFloat(tr.dataset.ms) / 1000).toFixed(1);
-      csv += `${tr.dataset.beep},${seconds},${tr.querySelector('.laps-input').value}\n`;
+      csv += `${tr.dataset.bip},${seconds},${tr.querySelector('.laps-input').value}\n`;
     });
     const a = Object.assign(document.createElement('a'), {
       href:     URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
@@ -370,7 +370,7 @@
     fillEl.style.width = Math.min(since / ivMs * 100, 100) + '%';
 
     const remaining = nextPipAt - now;
-    nextPipEl.innerHTML = `Next beep <span>#${pipCount + 1}</span> in <span>${fmt(Math.max(remaining, 0))}</span>`;
+    nextPipEl.innerHTML = `Next bip <span>#${pipCount + 1}</span> in <span>${fmt(Math.max(remaining, 0))}</span>`;
 
     if (running) rafId = requestAnimationFrame(tick);
   }
@@ -416,7 +416,7 @@
     clockEl.classList.remove('flash');
     nextPipEl.innerHTML    = 'Set an interval and press Start';
     fillEl.style.width     = '0%';
-    pipsBody.innerHTML     = `<tr id="empty-row"><td colspan="3" id="empty-msg">No beeps yet</td></tr>`;
+    pipsBody.innerHTML     = `<tr id="empty-row"><td colspan="3" id="empty-msg">No bips yet</td></tr>`;
     btnStop.style.display  = 'none';
     btnStart.style.display = '';
     btnStart.textContent   = 'Start';
