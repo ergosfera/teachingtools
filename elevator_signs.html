@@ -17,6 +17,7 @@
     --blue:   #4090d0;
     --green:  #1a8050;
     --red:    #c02818;
+    --red-light:#e06858;
     --text:   #102040;
     --dim:    #4870a8;
     --mark:   #1880b0;
@@ -191,7 +192,7 @@
     font-size: 11px; line-height: 1.8; color: var(--dim); margin-bottom: 9px;
   }
   .hl-v { color: var(--amber); font-weight: 600; }
-  .hl-a { color: var(--blue);  font-weight: 600; }
+  .hl-a { color: var(--red);   font-weight: 600; }
   .hl-g { color: var(--green); font-weight: 600; }
   .hl-r { color: var(--red);   font-weight: 600; }
   .sign-table {
@@ -278,7 +279,7 @@
       Positive is <span class="hl-g">upward</span>; negative is
       <span class="hl-r">downward</span>. The
       <span class="hl-v">blue arrow</span> shows velocity, the
-      <span class="hl-a">second arrow</span> shows acceleration — each
+      <span class="hl-a">red arrow</span> shows acceleration — each
       with its own direction.
     </p>
     <p>
@@ -630,8 +631,8 @@ function drawArrows(vMs, aMs2) {
   const vDir = vMs < 0 ? -1 : 1;
   const aDir = aMs2 < 0 ? -1 : 1;
 
-  const vColor = vMs < 0 ? '#c07020' : '#1858a8';
-  const aColor = aMs2 < 0 ? '#c02818' : aMs2 > 0 ? '#1a8050' : '#4870a8';
+  const vColor = vMs < 0 ? '#4090d0' : '#1858a8';
+  const aColor = aMs2 < 0 ? '#e06858' : aMs2 > 0 ? '#c02818' : '#4870a8';
 
   function drawVArrow(x, baseY, len, dir, color, label) {
     ctx.save();
@@ -759,12 +760,12 @@ function updateReadouts() {
   const { num, lbl } = fmtV(v);
   const vEl = document.getElementById('v-value');
   vEl.textContent = num;
-  vEl.style.color = v < 0 ? 'var(--orange)' : 'var(--amber)';
+  vEl.style.color = v < 0 ? 'var(--blue)' : 'var(--amber)';
   document.getElementById('v-unit-label').textContent = lbl;
 
   const aEl = document.getElementById('a-value');
   aEl.textContent = (acc > 0 ? '+' : '') + acc.toFixed(1);
-  aEl.style.color = acc > 0 ? 'var(--green)' : acc < 0 ? 'var(--red)' : 'var(--dim)';
+  aEl.style.color = acc > 0 ? 'var(--red)' : acc < 0 ? 'var(--red-light)' : 'var(--dim)';
 
   const chip  = document.getElementById('state-chip');
   const spdup = (v > 0.1 && acc > 0.01) || (v < -0.1 && acc < -0.01);

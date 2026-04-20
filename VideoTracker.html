@@ -1035,8 +1035,10 @@ function openCalibrationModal() {
     document.getElementById('modal-input').focus();
 }
 function cancelCalibration() {
+    document.getElementById('modal-input').blur();
     document.getElementById('modal-overlay').classList.remove('open');
     S.calPts = []; drawOverlay();
+    setTimeout(() => document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'), 350);
 }
 function confirmCalibration() {
     const val = parseFloat(document.getElementById('modal-input').value);
@@ -1045,7 +1047,9 @@ function confirmCalibration() {
     S.calDist    = val;
     S.unit       = document.getElementById('unit-sel').value;
     S.calibrated = true;
+    document.getElementById('modal-input').blur();
     document.getElementById('modal-overlay').classList.remove('open');
+    setTimeout(() => document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'), 350);
     updateTableHeader(); drawOverlay(); drawGraphX(); drawGraphY(); updateStatus();
 }
 document.getElementById('modal-input').addEventListener('keydown', e => {
