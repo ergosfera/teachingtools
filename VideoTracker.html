@@ -9,11 +9,13 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #1a1a2e;
     color: #eee;
-    height: 100vh;
+    height: 100vh; height: calc(var(--vh, 1vh) * 100);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
 }
 
 /* ── TOOLBAR ── */
@@ -272,6 +274,14 @@ tbody tr:hover { background: #131c2e; }
     <button id="btn-axes" class="active" onclick="toggleAxes()" title="Show/hide coordinate axes">Axes</button>
     <button id="btn-cal-overlay" class="active" onclick="toggleCalOverlay()" title="Show/hide calibration markers">Cal</button>
   </div>
+  <div class="tb-sep"></div>
+
+  <!-- Tutorial -->
+  <div class="tb-group">
+    <a href="https://ergosfera.github.io/teachingtools/VideoTracker_tutorial.html" target="_blank"
+       style="padding:4px 9px;border:1px solid #0f3460;border-radius:4px;background:#0f3460;color:#eee;font-size:12px;text-decoration:none;white-space:nowrap;transition:background 0.15s;"
+       onmouseover="this.style.background='#1a4a8a'" onmouseout="this.style.background='#0f3460'">📖 Tutorial</a>
+  </div>
 
 </div>
 
@@ -451,10 +461,18 @@ tbody tr:hover { background: #131c2e; }
   </div>
 </div>
 
-<!-- Hidden video element -->
-<video id="hv" style="display:none" preload="auto"></video>
+<!-- Hidden video element — playsinline required for iOS canvas drawing -->
+<video id="hv" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none"
+       preload="auto" playsinline webkit-playsinline></video>
 
 <script>
+// Fix iOS Safari 100vh bug
+(function setVh() {
+    document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+    window.addEventListener('resize', () =>
+        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'));
+})();
+
 // ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
@@ -743,6 +761,7 @@ function updatePlayBtn() {
 //  SCRUBBER
 // ═══════════════════════════════════════════════════════
 scrubber.addEventListener('mousedown', () => { if (S.isPlaying) pausePlayback(); });
+scrubber.addEventListener('touchstart', () => { if (S.isPlaying) pausePlayback(); }, { passive: true });
 scrubber.addEventListener('input', () => { if (S.videoLoaded) seekTo(parseInt(scrubber.value)); });
 function updateScrubber() { scrubber.value = S.frameIndex; }
 
@@ -849,14 +868,21 @@ function worldToCanvas(wx, wy) {
 // ═══════════════════════════════════════════════════════
 function canvasPos(e) {
     const r = ocan.getBoundingClientRect();
+    const src = e.touches && e.touches.length     ? e.touches[0]        :
+                e.changedTouches && e.changedTouches.length ? e.changedTouches[0] : e;
     return {
-        x: (e.clientX - r.left) * (ocan.width  / r.width),
-        y: (e.clientY - r.top)  * (ocan.height / r.height),
+        x: (src.clientX - r.left) * (ocan.width  / r.width),
+        y: (src.clientY - r.top)  * (ocan.height / r.height),
     };
 }
 function dist2(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
-ocan.addEventListener('mousemove', e => {
+function handlePointerDown(e, touchRadius) {
+    const p = canvasPos(e);
+    if (S.mode === 'setup' && dist2(p, S.origin) < touchRadius) S.dragging = true;
+}
+
+function handlePointerMove(e) {
     const p = canvasPos(e);
     S.lastCursorPos = p;
     const w = canvasToWorld(p.x, p.y);
@@ -866,14 +892,9 @@ ocan.addEventListener('mousemove', e => {
         S.origin = { x: p.x, y: p.y };
         drawOverlay();
     }
-});
+}
 
-ocan.addEventListener('mousedown', e => {
-    const p = canvasPos(e);
-    if (S.mode === 'setup' && dist2(p, S.origin) < 14) S.dragging = true;
-});
-
-ocan.addEventListener('mouseup', e => {
+function handlePointerUp(e) {
     if (S.dragging) { S.dragging = false; return; }
     const p = canvasPos(e);
     if (S.mode === 'calibration') {
@@ -882,12 +903,30 @@ ocan.addEventListener('mouseup', e => {
         return;
     }
     if (S.mode === 'tracking' && S.calibrated) addTrackPoint(p);
-});
+}
 
+// Mouse events
+ocan.addEventListener('mousemove',  e => handlePointerMove(e));
+ocan.addEventListener('mousedown',  e => handlePointerDown(e, 14));
+ocan.addEventListener('mouseup',    e => handlePointerUp(e));
 ocan.addEventListener('mouseleave', () => {
     S.dragging = false;
     document.getElementById('st-cursor').textContent = '—';
 });
+
+// Touch events (iOS / iPad)
+ocan.addEventListener('touchstart', e => {
+    e.preventDefault();
+    handlePointerDown(e, 28);
+}, { passive: false });
+ocan.addEventListener('touchmove', e => {
+    e.preventDefault();
+    handlePointerMove(e);
+}, { passive: false });
+ocan.addEventListener('touchend', e => {
+    e.preventDefault();
+    handlePointerUp(e);
+}, { passive: false });
 
 // Keyboard shortcuts
 window.addEventListener('keydown', e => {

@@ -370,9 +370,9 @@
       <span class="card-open">Open →</span>
     </a>
 
-    <a class="card" href="VideoTracker.html">
+    <div class="card" onclick="window.location='VideoTracker.html'" style="cursor:pointer">
       <div class="card-icon">🎬</div>
-      <div class="card-title">Video Tracker <span class="badge-dev">In Dev</span></div>
+      <div class="card-title">Video Tracker</div>
       <div class="card-desc">Inspired by Douglas Brown's Tracker. Track objects frame by frame in any video, regardless of platform or hardware. Ideal for motion analysis, kinematics, and experimental physics directly in the browser.</div>
       <div class="card-tags">
         <span class="tag">Video Analysis</span>
@@ -380,8 +380,15 @@
         <span class="tag">Physics</span>
         <span class="tag">Motion Tracking</span>
       </div>
-      <span class="card-open">Open →</span>
-    </a>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <a href="VideoTracker.html" class="card-open" onclick="event.stopPropagation()">Open →</a>
+        <a href="https://ergosfera.github.io/teachingtools/VideoTracker_tutorial.html" target="_blank"
+           onclick="event.stopPropagation()"
+           style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;text-decoration:none;background:var(--surface2);border:1px solid var(--border);color:var(--muted);transition:border-color .15s,color .15s;"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">📖 Tutorial</a>
+      </div>
+    </div>
 
   </div>
 
