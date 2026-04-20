@@ -258,7 +258,7 @@
         acceleration <span class="sym">a</span>
         <span id="a-display" class="sym">0 m/s²</span>
       </div>
-      <input type="range" id="a-slider" min="-8" max="8" value="0" step="0.5">
+      <input type="range" id="a-slider" min="-9.8" max="9.8" value="0" step="0.1">
     </div>
     <div id="kbd-hint">
       <span class="kbd">▲</span><span class="kbd">▼</span>
@@ -616,7 +616,7 @@ function drawArrows(vMs, aMs2) {
   const MAX_PX = H * 0.30;
   const vKmh   = vMs * 3.6;
   const vLen   = Math.min(Math.abs(vKmh) / 120 * MAX_PX, MAX_PX);
-  const aLen   = Math.min(Math.abs(aMs2) / 8   * MAX_PX * 0.78, MAX_PX * 0.78);
+  const aLen   = Math.min(Math.abs(aMs2) / 9.8 * MAX_PX * 0.78, MAX_PX * 0.78);
 
   // +1 = up (tip toward screen top = smaller Y), -1 = down
   const vDir = vMs < 0 ? -1 : 1;
@@ -768,7 +768,7 @@ function updateReadouts() {
 
 // ── Sync a-slider ─────────────────────────────────────────────
 function setAcc(val) {
-  acc = Math.max(-8, Math.min(8, val));
+  acc = Math.max(-9.8, Math.min(9.8, val));
   document.getElementById('a-slider').value = acc;
   document.getElementById('a-display').textContent =
     (acc > 0 ? '+' : '') + acc.toFixed(1) + ' m/s²';
