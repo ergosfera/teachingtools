@@ -10,6 +10,17 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
+    --bg:        #0d1117;
+    --bg2:       #161b22;
+    --border:    #30363d;
+    --ball:      #e05030;
+    --mark:      #3fb950;
+    --mark-glow: #56d364;
+    --amber:     #d29922;
+    --text:      #e6edf3;
+    --text-dim:  #8b949e;
+  }
+  body.light {
     --bg:        #f4f1ec;
     --bg2:       #edeae3;
     --border:    #d0c9bc;
@@ -20,6 +31,23 @@
     --text:      #2a2420;
     --text-dim:  #8a8278;
   }
+  #theme-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    background: var(--bg2, #161b22);
+    border: 1px solid var(--border, #30363d);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim, #8b949e);
+    transition: border-color .2s, color .2s;
+    user-select: none;
+  }
+  #theme-toggle:hover { border-color: var(--amber, #d29922); color: var(--amber, #d29922); }
 
   html, body {
     height: 100%; background: var(--bg); color: var(--text);
@@ -568,6 +596,19 @@ document.getElementById('accel-slider').addEventListener('input', e => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 drawSim(0); drawGraph();
+</script>
+<button id="theme-toggle">☀</button>
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '☽' : '☀';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>

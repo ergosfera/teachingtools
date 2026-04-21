@@ -6,17 +6,50 @@
 <title>Video Tracker — Tutorial</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --border: #0f3460;
+    --text: #dde;
+    --muted: #aaa;
+    --accent: #e94560;
+}
+body.light {
+    --bg: #f6f8fa;
+    --surface: #e8ecf0;
+    --border: #c0c8d4;
+    --text: #1f2328;
+    --muted: #656d76;
+    --accent: #e94560;
+}
+#theme-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    background: var(--surface, #16213e);
+    border: 1px solid var(--border, #0f3460);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted, #aaa);
+    transition: border-color .2s, color .2s;
+    user-select: none;
+}
+#theme-toggle:hover { border-color: var(--accent, #e94560); color: var(--accent, #e94560); }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #1a1a2e;
-    color: #dde;
+    background: var(--bg);
+    color: var(--text);
     line-height: 1.65;
 }
 
 /* ── NAV ── */
 nav {
-    background: #16213e;
-    border-bottom: 1px solid #0f3460;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
     padding: 10px 24px;
     display: flex;
     align-items: center;
@@ -46,8 +79,8 @@ nav a.launch-btn:hover { background: #c73050; }
     width: 210px;
     height: calc(100vh - 52px);
     overflow-y: auto;
-    background: #0d1117;
-    border-right: 1px solid #0f3460;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
     padding: 18px 0;
 }
 .toc-sidebar h3 {
@@ -561,6 +594,19 @@ const obs = new IntersectionObserver(entries => {
     });
 }, { rootMargin: '-20% 0px -70% 0px' });
 document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+</script>
+<button id="theme-toggle">☀</button>
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '☽' : '☀';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>

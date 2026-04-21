@@ -7,9 +7,45 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+    }
+    body.light {
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #656d76;
+      --accent: #0969da;
+      --green: #1a7f37;
+    }
+    #theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: var(--surface, #161b22);
+      border: 1px solid var(--border, #30363d);
+      border-radius: 20px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted, #8b949e);
+      transition: border-color .2s, color .2s;
+      user-select: none;
+    }
+    #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
+
     body {
-      background: #0d1117;
-      color: #e6edf3;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Segoe UI', system-ui, sans-serif;
       height: 100vh;
       display: flex;
@@ -38,8 +74,8 @@
       font-size: 1.3rem;
       font-weight: 700;
       text-align: center;
-      background: #161b22;
-      border: 2px solid #30363d;
+      background: var(--surface);
+      border: 2px solid var(--border);
       border-radius: 10px;
       color: #58a6ff;
       outline: none;
@@ -134,8 +170,8 @@
       flex: 1;
       overflow-y: auto;
       border-radius: 14px;
-      background: #161b22;
-      border: 1px solid #21262d;
+      background: var(--surface);
+      border: 1px solid var(--border);
     }
     #pips-section::-webkit-scrollbar { width: 6px; }
     #pips-section::-webkit-scrollbar-track { background: transparent; }
@@ -435,6 +471,19 @@
   intervalIn.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !running) doStart();
   });
+</script>
+<button id="theme-toggle">☀</button>
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '☽' : '☀';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>

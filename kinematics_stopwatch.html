@@ -20,6 +20,35 @@
       --red:     #f85149;
       --radius:  8px;
     }
+    body.light {
+      --bg:      #f6f8fa;
+      --surface: #ffffff;
+      --surface2:#f0f4f8;
+      --border:  #d0d7de;
+      --text:    #1f2328;
+      --muted:   #656d76;
+      --accent:  #0969da;
+      --green:   #1a7f37;
+      --yellow:  #9a6700;
+      --red:     #cf222e;
+    }
+    #theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: var(--surface, #161b22);
+      border: 1px solid var(--border, #30363d);
+      border-radius: 20px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted, #8b949e);
+      transition: border-color .2s, color .2s;
+      user-select: none;
+    }
+    #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
 
     html, body { height: 100%; overflow: hidden; }
 
@@ -831,6 +860,19 @@ ro.observe(document.querySelector('.charts-wrap'));
 
 // Initial render
 renderCharts();
+</script>
+<button id="theme-toggle">☀</button>
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '☽' : '☀';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>

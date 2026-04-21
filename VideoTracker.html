@@ -5,10 +5,45 @@
 <title>Video Tracker — Physics Analysis</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --border: #0f3460;
+    --text: #eee;
+    --muted: #aaa;
+    --accent: #e94560;
+    --button-bg: #0f3460;
+}
+body.light {
+    --bg: #f6f8fa;
+    --surface: #e8ecf0;
+    --border: #c0c8d4;
+    --text: #1f2328;
+    --muted: #656d76;
+    --accent: #e94560;
+    --button-bg: #d0d8e4;
+}
+#theme-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    background: var(--surface, #16213e);
+    border: 1px solid var(--border, #0f3460);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted, #aaa);
+    transition: border-color .2s, color .2s;
+    user-select: none;
+}
+#theme-toggle:hover { border-color: var(--accent, #e94560); color: var(--accent, #e94560); }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #1a1a2e;
-    color: #eee;
+    background: var(--bg);
+    color: var(--text);
     height: 100vh; height: calc(var(--vh, 1vh) * 100);
     display: flex;
     flex-direction: column;
@@ -20,25 +55,25 @@ body {
 
 /* ── TOOLBAR ── */
 #toolbar {
-    background: #16213e;
+    background: var(--surface);
     padding: 6px 10px;
     display: flex;
     align-items: center;
     gap: 7px;
-    border-bottom: 1px solid #0f3460;
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
     flex-shrink: 0;
 }
-.tb-sep { width: 1px; height: 24px; background: #0f3460; margin: 0 1px; flex-shrink: 0; }
+.tb-sep { width: 1px; height: 24px; background: var(--border); margin: 0 1px; flex-shrink: 0; }
 .tb-group { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 label.tb-label { font-size: 11px; color: #aaa; white-space: nowrap; }
 
 button {
     padding: 4px 9px;
-    border: 1px solid #0f3460;
+    border: 1px solid var(--border);
     border-radius: 4px;
-    background: #0f3460;
-    color: #eee;
+    background: var(--button-bg);
+    color: var(--text);
     cursor: pointer;
     font-size: 12px;
     transition: background 0.15s;
@@ -78,12 +113,12 @@ select {
 
 /* ── VIDEO CONTROLS BAR (under video) ── */
 #video-controls {
-    background: #16213e;
+    background: var(--surface);
     padding: 5px 10px;
     display: flex;
     align-items: center;
     gap: 7px;
-    border-top: 1px solid #0f3460;
+    border-top: 1px solid var(--border);
     flex-wrap: wrap;
     flex-shrink: 0;
 }
@@ -1451,6 +1486,19 @@ function fmtNum(v) {
 
 // Init
 drawGraphX(); drawGraphY(); updateStatus();
+</script>
+<button id="theme-toggle">☀</button>
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '☽' : '☀';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>
