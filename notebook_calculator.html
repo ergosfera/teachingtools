@@ -75,13 +75,13 @@ body { display: flex; }
 }
 #calc-expr {
   width: 100%; background: transparent; border: none; outline: none;
-  font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 600;
+  font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 600;
   color: var(--text); text-align: right; caret-color: var(--accent);
 }
 #calc-expr::placeholder { color: #c0c8d8; font-weight: 400; font-size: 1.1rem; }
 #calc-result {
   text-align: right; font-family: 'Courier New', monospace;
-  font-size: 2.6rem; font-weight: 300; color: var(--accent);
+  font-size: 3.2rem; font-weight: 300; color: var(--accent);
   min-height: 3rem; margin-top: 3px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
@@ -103,20 +103,20 @@ body { display: flex; }
   gap: 4px; padding: 8px;
 }
 .cb {
-  border: 1px solid var(--border); border-radius: 7px;
-  font-family: inherit; font-size: clamp(0.58rem, 1.1vw, 0.8rem); font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.25); border-radius: 7px;
+  font-family: inherit; font-size: clamp(1rem, 1.8vw, 1.3rem); font-weight: 600;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   line-height: 1.2; user-select: none; padding: 0;
   transition: filter .08s, transform .06s;
 }
-.cb:hover  { filter: brightness(0.92); }
+.cb:hover  { filter: brightness(1.18); }
 .cb:active { transform: scale(0.93); filter: brightness(0.84); }
-.cb-num  { background: #ffffff;  color: var(--text); }
-.cb-op   { background: #dbeafe;  color: #1558a0; }
-.cb-fn   { background: #dcfce7;  color: #155e20; }
-.cb-spec { background: #fef3c7;  color: #92400e; }
-.cb-ctrl { background: #fee2e2;  color: #991b1b; }
-.cb-eq   { background: var(--accent); color: #fff; border-color: var(--accent); font-size: clamp(0.9rem,1.6vw,1.2rem); grid-column: span 4; }
+.cb-num  { background: #2d3748;  color: #ffffff; }
+.cb-op   { background: #1e3a5f;  color: #ffffff; }
+.cb-fn   { background: #1a4731;  color: #ffffff; }
+.cb-spec { background: #6b3500;  color: #ffffff; }
+.cb-ctrl { background: #7f1d1d;  color: #ffffff; }
+.cb-eq   { background: var(--accent); color: #fff; border-color: var(--accent); font-size: clamp(1rem,1.8vw,1.3rem); grid-column: span 4; }
 .cb-eq:hover { filter: brightness(1.1); }
 
 ::-webkit-scrollbar { width: 4px; }
@@ -186,7 +186,7 @@ body { display: flex; }
     <button class="cb cb-fn"   data-ins="asin(">sin⁻¹</button>
     <button class="cb cb-fn"   data-ins="acos(">cos⁻¹</button>
     <button class="cb cb-fn"   data-ins="atan(">tan⁻¹</button>
-    <button class="cb cb-ctrl" data-act="clear">C</button>
+    <button class="cb cb-ctrl" data-act="clear">AC</button>
     <!-- log / root -->
     <button class="cb cb-fn"   data-ins="log(">log</button>
     <button class="cb cb-fn"   data-ins="ln(">ln</button>
@@ -195,7 +195,7 @@ body { display: flex; }
     <!-- constants / power -->
     <button class="cb cb-spec" data-ins="π">π</button>
     <button class="cb cb-spec" data-ins="e">e</button>
-    <button class="cb cb-spec" data-ins="*10^">EE</button>
+    <button class="cb cb-spec" data-ins="*10^">×10^</button>
     <button class="cb cb-op"   data-ins="^">xʸ</button>
     <!-- brackets / ANS -->
     <button class="cb cb-op"   data-ins="(">(</button>
