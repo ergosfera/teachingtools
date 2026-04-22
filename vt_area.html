@@ -33,10 +33,6 @@
       --red:     #cf222e;
     }
     #theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
       background: var(--surface, #161b22);
       border: 1px solid var(--border, #30363d);
       border-radius: 20px;
@@ -47,6 +43,7 @@
       color: var(--muted, #8b949e);
       transition: border-color .2s, color .2s;
       user-select: none;
+      flex-shrink: 0;
     }
     #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
 
@@ -377,6 +374,7 @@
   </div>
   <div class="header-right">
     <button class="sample-btn" onclick="loadSample()">Load sample data</button>
+    <button id="theme-toggle">☀</button>
   </div>
 </header>
 
@@ -699,6 +697,10 @@ function niceStep(range, target = 5) {
   return nice * mag;
 }
 
+function cssVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
 function drawChart() {
   const canvas = document.getElementById('chart');
   const wrap   = canvas.parentElement;
@@ -715,6 +717,11 @@ function drawChart() {
   const P = { t: 20, r: 20, b: 44, l: 62 };
   const pw = W - P.l - P.r;
   const ph = H - P.t - P.b;
+
+  const cBg     = cssVar('--bg');
+  const cMuted  = cssVar('--muted');
+  const cText   = cssVar('--text');
+  const cBorder = cssVar('--border');
 
   // Axis ranges
   const ts = points.map(p => p.t);
@@ -735,11 +742,11 @@ function drawChart() {
   const ty0 = ty(0);   // y-canvas coordinate of v=0
 
   // ── Background ───────────────────────────────────────────
-  ctx.fillStyle = '#0d1117';
+  ctx.fillStyle = cBg;
   ctx.fillRect(0, 0, W, H);
 
   // ── Grid ─────────────────────────────────────────────────
-  ctx.strokeStyle = '#21262d';
+  ctx.strokeStyle = cBorder;
   ctx.lineWidth   = 1;
   ctx.setLineDash([]);
 
@@ -813,25 +820,25 @@ function drawChart() {
       ctx.textBaseline = 'middle';
 
       // Text shadow for legibility
-      ctx.shadowColor   = '#0d1117';
+      ctx.shadowColor   = cBg;
       ctx.shadowBlur    = 4;
-      ctx.fillStyle     = sh.below ? '#ffa198' : '#ffffff';
+      ctx.fillStyle     = cText;
       ctx.fillText(areaText, cx, cy);
       ctx.shadowBlur    = 0;
 
       // Also show small formula if there's enough room
       if (shH > 32 && shW > 72) {
-        ctx.font      = '9px Segoe UI, system-ui, sans-serif';
-        ctx.fillStyle = sh.below ? 'rgba(255,161,152,.75)' : 'rgba(255,255,255,.6)';
-        ctx.shadowColor = '#0d1117'; ctx.shadowBlur = 3;
+        ctx.font        = '9px Segoe UI, system-ui, sans-serif';
+        ctx.fillStyle   = cMuted;
+        ctx.shadowColor = cBg; ctx.shadowBlur = 3;
         ctx.fillText(sh.formula, cx, cy + 14);
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur  = 0;
       }
     });
   });
 
   // ── v = 0 axis line ───────────────────────────────────────
-  ctx.strokeStyle = '#8b949e';
+  ctx.strokeStyle = cMuted;
   ctx.lineWidth   = 1.5;
   ctx.setLineDash([]);
   ctx.beginPath();
@@ -840,7 +847,7 @@ function drawChart() {
   ctx.stroke();
 
   // ── Tick labels ───────────────────────────────────────────
-  ctx.fillStyle    = '#8b949e';
+  ctx.fillStyle    = cMuted;
   ctx.font         = '10px Segoe UI, system-ui, sans-serif';
   ctx.textBaseline = 'top';
   ctx.textAlign    = 'center';
@@ -855,7 +862,7 @@ function drawChart() {
   }
 
   // Axis name labels
-  ctx.fillStyle    = '#8b949e';
+  ctx.fillStyle    = cMuted;
   ctx.font         = 'bold 10px Segoe UI, system-ui, sans-serif';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'bottom';
@@ -869,7 +876,7 @@ function drawChart() {
   ctx.restore();
 
   // ── v-t Curve ─────────────────────────────────────────────
-  ctx.strokeStyle = '#e6edf3';
+  ctx.strokeStyle = cText;
   ctx.lineWidth   = 2;
   ctx.lineJoin    = 'round';
   ctx.setLineDash([]);
@@ -883,8 +890,8 @@ function drawChart() {
   points.forEach(p => {
     ctx.beginPath();
     ctx.arc(tx(p.t), ty(p.v), 4, 0, Math.PI * 2);
-    ctx.fillStyle   = '#e6edf3';
-    ctx.strokeStyle = '#0d1117';
+    ctx.fillStyle   = cText;
+    ctx.strokeStyle = cBg;
     ctx.lineWidth   = 1.5;
     ctx.fill();
     ctx.stroke();
@@ -1109,7 +1116,6 @@ const ro = new ResizeObserver(() => {
 });
 ro.observe(document.querySelector('.chart-wrap'));
 </script>
-<button id="theme-toggle">☀</button>
 <script>
 (function(){
   const btn = document.getElementById('theme-toggle');
@@ -1119,6 +1125,7 @@ ro.observe(document.querySelector('.chart-wrap'));
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    if (points.length >= 2) drawChart();
   });
 })();
 </script>

@@ -33,22 +33,19 @@
       --red:     #cf222e;
     }
     #theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
-      background: var(--surface, #161b22);
-      border: 1px solid var(--border, #30363d);
+      background: var(--surface2);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 5px 12px;
+      padding: 4px 10px;
       cursor: pointer;
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--muted, #8b949e);
+      color: var(--muted);
       transition: border-color .2s, color .2s;
       user-select: none;
+      flex-shrink: 0;
     }
-    #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
+    #theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
     html, body { height: 100%; overflow: hidden; }
 
@@ -298,7 +295,7 @@
 
     tbody td {
       padding: 5px 12px;
-      border-bottom: 1px solid rgba(48,54,61,0.55);
+      border-bottom: 1px solid var(--border);
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
@@ -368,7 +365,8 @@
 <header>
   <h1>Kinematics <span>Stopwatch</span></h1>
   <div class="hints">
-    <span><kbd>Space</kbd> Start · Lap</span>
+    <button id="theme-toggle">☀</button>
+    <span style="margin-left:4px"><kbd>Space</kbd> Start · Lap</span>
     <span><kbd>P</kbd> Pause / Resume</span>
     <span><kbd>R</kbd> Reset</span>
     <span><kbd>E</kbd> Export CSV</span>
@@ -703,13 +701,18 @@ function drawPlot(id, data, xLabel, yLabel, color) {
   const pw = W - P.l - P.r;
   const ph = H - P.t - P.b;
 
+  const cs = getComputedStyle(document.body);
+  const cSurface  = cs.getPropertyValue('--surface').trim();
+  const cMuted    = cs.getPropertyValue('--muted').trim();
+  const cSurface2 = cs.getPropertyValue('--surface2').trim();
+
   // Background
-  ctx.fillStyle = '#161b22';
+  ctx.fillStyle = cSurface;
   ctx.fillRect(0, 0, W, H);
 
   // No-data message
   if (data.length < 1) {
-    ctx.fillStyle = '#484f58';
+    ctx.fillStyle = cMuted;
     ctx.font = '11px Segoe UI, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -732,8 +735,7 @@ function drawPlot(id, data, xLabel, yLabel, color) {
   const ty = v => P.t + (1 - (v - yMin) / (yMax - yMin)) * ph;
 
   // Grid
-  const gridColor = '#21262d';
-  ctx.strokeStyle = gridColor;
+  ctx.strokeStyle = cSurface2;
   ctx.lineWidth   = 1;
   const NX = 4, NY = 4;
   for (let i = 0; i <= NX; i++) {
@@ -746,7 +748,7 @@ function drawPlot(id, data, xLabel, yLabel, color) {
   }
 
   // Axis tick labels
-  ctx.fillStyle    = '#8b949e';
+  ctx.fillStyle    = cMuted;
   ctx.font         = '9px Segoe UI, system-ui, sans-serif';
   ctx.textBaseline = 'top';
   ctx.textAlign    = 'center';
@@ -764,7 +766,7 @@ function drawPlot(id, data, xLabel, yLabel, color) {
   }
 
   // Axis labels
-  ctx.fillStyle    = '#8b949e';
+  ctx.fillStyle    = cMuted;
   ctx.font         = '10px Segoe UI, system-ui, sans-serif';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'bottom';
@@ -800,7 +802,7 @@ function drawPlot(id, data, xLabel, yLabel, color) {
 
   // Dot labels (checkpoint names for x-chart)
   if (yLabel === 'x (m)') {
-    ctx.fillStyle    = '#8b949e';
+    ctx.fillStyle    = cMuted;
     ctx.font         = '9px Segoe UI, system-ui, sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'bottom';
@@ -861,7 +863,6 @@ ro.observe(document.querySelector('.charts-wrap'));
 // Initial render
 renderCharts();
 </script>
-<button id="theme-toggle">☀</button>
 <script>
 (function(){
   const btn = document.getElementById('theme-toggle');

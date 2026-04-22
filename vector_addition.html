@@ -14,6 +14,17 @@
       --text: #e6edf3;
       --muted: #8b949e;
       --accent: #58a6ff;
+      --table-head-bg: #1c2128;
+      --canvas-bg1:    #161b22;
+      --canvas-bg2:    #0d1117;
+      --grid-color:    #21272e;
+      --axis-color:    #7788bb;
+      --axis-label:    #5588dd;
+      --fnet-bg1:      #1c2128;
+      --fnet-bg2:      #161b22;
+      --fnet-arrow:    #a8b8e8;
+      --fnet-text:     #c8d8f8;
+      --hint-text:     #3a4a5a;
     }
     body.light {
       --bg: #eef0f6;
@@ -22,6 +33,17 @@
       --text: #334;
       --muted: #8899aa;
       --accent: #4455aa;
+      --table-head-bg: #f0f2f9;
+      --canvas-bg1:    #f9fafd;
+      --canvas-bg2:    #f2f4fa;
+      --grid-color:    #d8dcea;
+      --axis-color:    #2a2a44;
+      --axis-label:    #4455aa;
+      --fnet-bg1:      #f4f5fb;
+      --fnet-bg2:      #eceef7;
+      --fnet-arrow:    #1a2a4a;
+      --fnet-text:     #1a2a4a;
+      --hint-text:     #aabbcc;
     }
     #theme-toggle {
       position: fixed;
@@ -48,7 +70,7 @@
       align-items: center;
       padding: 14px 14px 20px;
       font-family: 'Segoe UI', system-ui, sans-serif;
-      color: #334;
+      color: var(--text);
       user-select: none;
       min-height: 100vh;
     }
@@ -57,7 +79,7 @@
       font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: 1.5px;
-      color: #223355;
+      color: var(--text);
       margin-bottom: 2px;
       text-transform: uppercase;
       text-align: center;
@@ -65,7 +87,7 @@
 
     p.sub {
       font-size: 0.75rem;
-      color: #8899aa;
+      color: var(--muted);
       margin-bottom: 10px;
       text-align: center;
     }
@@ -103,15 +125,15 @@
     }
 
     #vec-table thead tr {
-      background: #f0f2f9;
+      background: var(--table-head-bg);
     }
 
     #vec-table th {
       padding: 7px 5px;
       font-weight: 700;
-      color: #4455aa;
+      color: var(--accent);
       text-align: center;
-      border-bottom: 1.5px solid #dde2ec;
+      border-bottom: 1.5px solid var(--border);
       font-size: 0.75rem;
       letter-spacing: 0.3px;
     }
@@ -119,7 +141,7 @@
     #vec-table td {
       padding: 5px 4px;
       text-align: center;
-      border-bottom: 1px solid #eef0f6;
+      border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
 
@@ -149,24 +171,24 @@
     .mag-input {
       width: 52px;
       padding: 3px 4px;
-      border: 1.5px solid #ccd;
+      border: 1.5px solid var(--border);
       border-radius: 5px;
       font-size: 0.78rem;
       font-weight: 700;
       text-align: center;
       outline: none;
-      background: #fafafe;
-      color: #334;
+      background: var(--bg);
+      color: var(--text);
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .mag-input:focus {
-      border-color: #4477cc;
+      border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(68,119,204,0.18);
     }
 
     .ro-cell {
-      color: #556;
+      color: var(--muted);
       font-size: 0.77rem;
       font-weight: 600;
     }
@@ -211,7 +233,7 @@
 
     #btn-remove { background: #e03000; color: #fff; }
     #btn-fnet   { background: #1a2a4a; color: #e8eeff; }
-    #btn-reset  { background: #ccd0dd; color: #445; border: 1px solid #bbc; }
+    #btn-reset  { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 
     .hint {
       font-size: 0.70rem;
@@ -301,6 +323,8 @@
 </div>
 
 <script>
+function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & CONFIG
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -464,15 +488,15 @@ function rightAngleMark(ctx, cornerX, cornerY, d1x, d1y, d2x, d2y, size, color) 
 
 function drawMainBg() {
   const g = mctx.createLinearGradient(0, 0, 0, MH);
-  g.addColorStop(0, '#f9fafd');
-  g.addColorStop(1, '#f2f4fa');
+  g.addColorStop(0, cssVar('--canvas-bg1'));
+  g.addColorStop(1, cssVar('--canvas-bg2'));
   mctx.fillStyle = g;
   mctx.fillRect(0, 0, MW, MH);
 }
 
 function drawMainGrid() {
   mctx.save();
-  mctx.strokeStyle = '#d8dcea';
+  mctx.strokeStyle = cssVar('--grid-color');
   mctx.lineWidth   = 1;
   for (let x = MOX % GRID_SPACING; x < MW; x += GRID_SPACING) {
     mctx.beginPath(); mctx.moveTo(x, 0); mctx.lineTo(x, MH); mctx.stroke();
@@ -488,14 +512,14 @@ function drawMainAxes() {
 
   // Draw rotated axes
   drawArrow(mctx, MOX - AXIS * ex.x, MOY - AXIS * ex.y,
-                  MOX + AXIS * ex.x, MOY + AXIS * ex.y, '#2a2a44', 1.8, 10);
+                  MOX + AXIS * ex.x, MOY + AXIS * ex.y, cssVar('--axis-color'), 1.8, 10);
   drawArrow(mctx, MOX - AXIS * ey.x, MOY - AXIS * ey.y,
-                  MOX + AXIS * ey.x, MOY + AXIS * ey.y, '#2a2a44', 1.8, 10);
+                  MOX + AXIS * ey.x, MOY + AXIS * ey.y, cssVar('--axis-color'), 1.8, 10);
 
   // Axis labels
   mctx.save();
   mctx.font = 'italic bold 17px Georgia, serif';
-  mctx.fillStyle = '#4455aa';
+  mctx.fillStyle = cssVar('--axis-label');
   mctx.textAlign = 'center';
   mctx.textBaseline = 'middle';
   mctx.fillText('x', MOX + (AXIS + 18) * ex.x, MOY + (AXIS + 18) * ex.y);
@@ -504,7 +528,7 @@ function drawMainAxes() {
 
   // Origin dot
   mctx.save();
-  mctx.fillStyle = '#556';
+  mctx.fillStyle = cssVar('--axis-color');
   mctx.beginPath();
   mctx.arc(MOX, MOY, 4, 0, Math.PI * 2);
   mctx.fill();
@@ -705,7 +729,7 @@ function drawMain() {
   if (vectors.length === 0 && !previewVec) {
     mctx.save();
     mctx.font      = '15px "Segoe UI", system-ui, sans-serif';
-    mctx.fillStyle = '#aab';
+    mctx.fillStyle = cssVar('--muted');
     mctx.textAlign = 'center';
     mctx.textBaseline = 'middle';
     mctx.fillText('Click near the origin to draw a vector', MOX, MOY + 60);
@@ -725,8 +749,8 @@ function drawFnetPanel() {
 
   // Background
   const g = ctx.createLinearGradient(0, 0, 0, FH);
-  g.addColorStop(0, '#f4f5fb');
-  g.addColorStop(1, '#eceef7');
+  g.addColorStop(0, cssVar('--fnet-bg1'));
+  g.addColorStop(1, cssVar('--fnet-bg2'));
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.roundRect(0, 0, FW, FH, 8);
@@ -734,7 +758,7 @@ function drawFnetPanel() {
 
   // Light grid
   ctx.save();
-  ctx.strokeStyle = '#d8dcea';
+  ctx.strokeStyle = cssVar('--grid-color');
   ctx.lineWidth   = 0.8;
   for (let x = 0; x < FW; x += GRID_SPACING) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, FH); ctx.stroke();
@@ -749,12 +773,12 @@ function drawFnetPanel() {
 
   // Reference world axes (always horizontal/vertical — not rotated)
   const FAXIS = Math.min(FW / 2 - 20, FOY - 4);
-  drawArrow(ctx, FOX - FAXIS, FOY, FOX + FAXIS, FOY, '#2a2a44', 1.2, 7);
-  drawArrow(ctx, FOX, FOY + FAXIS, FOX, FOY - FAXIS, '#2a2a44', 1.2, 7);
+  drawArrow(ctx, FOX - FAXIS, FOY, FOX + FAXIS, FOY, cssVar('--axis-color'), 1.2, 7);
+  drawArrow(ctx, FOX, FOY + FAXIS, FOX, FOY - FAXIS, cssVar('--axis-color'), 1.2, 7);
 
   ctx.save();
   ctx.font = 'italic bold 12px Georgia, serif';
-  ctx.fillStyle = '#4455aa';
+  ctx.fillStyle = cssVar('--axis-label');
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('x', FOX + FAXIS + 12, FOY);
@@ -764,7 +788,7 @@ function drawFnetPanel() {
   if (vectors.length === 0) {
     ctx.save();
     ctx.font = '13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#aab';
+    ctx.fillStyle = cssVar('--muted');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Net force — draw vectors to see result', FOX, FOY + 8);
@@ -772,7 +796,7 @@ function drawFnetPanel() {
 
     ctx.save();
     ctx.font = '11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#99aacc';
+    ctx.fillStyle = cssVar('--muted');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText('|Fnet| = —    \u03b8 = —    Fnx = —    Fny = —', FW / 2, FH - 6);
@@ -791,7 +815,7 @@ function drawFnetPanel() {
 
   // Draw ONLY the Fnet arrow — no components, no dashed lines
   if (fn.mag > 0) {
-    drawArrow(ctx, FOX, FOY, FOX + fnvx, FOY + fnvy, '#1a2a4a', 2.8, 10);
+    drawArrow(ctx, FOX, FOY, FOX + fnvx, FOY + fnvy, cssVar('--fnet-arrow'), 2.8, 10);
   }
 
   // Bottom text line
@@ -812,7 +836,7 @@ function drawFnetPanel() {
 
   ctx.save();
   ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
-  ctx.fillStyle = '#1a2a4a';
+  ctx.fillStyle = cssVar('--fnet-text');
   ctx.textAlign = 'center';
   ctx.textBaseline = 'bottom';
   ctx.fillText(
@@ -1229,11 +1253,12 @@ ensurePulse();
 (function(){
   const btn = document.getElementById('theme-toggle');
   const saved = localStorage.getItem('theme');
-  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; drawMain(); drawFnetPanel(); }
   btn.addEventListener('click', () => {
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    drawMain(); drawFnetPanel();
   });
 })();
 </script>

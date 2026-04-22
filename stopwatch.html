@@ -66,7 +66,7 @@
       padding: 18px 32px 10px;
       flex-wrap: wrap;
     }
-    #top-bar label { font-size: 1.1rem; color: #8b949e; white-space: nowrap; }
+    #top-bar label { font-size: 1.1rem; color: var(--muted); white-space: nowrap; }
 
     #interval-input {
       width: 90px;
@@ -77,11 +77,11 @@
       background: var(--surface);
       border: 2px solid var(--border);
       border-radius: 10px;
-      color: #58a6ff;
+      color: var(--accent);
       outline: none;
       transition: border-color .2s;
     }
-    #interval-input:focus { border-color: #58a6ff; }
+    #interval-input:focus { border-color: var(--accent); }
 
     /* ── CLOCK ── */
     #clock-wrap {
@@ -96,25 +96,25 @@
       font-weight: 800;
       letter-spacing: 0.04em;
       font-variant-numeric: tabular-nums;
-      color: #e6edf3;
+      color: var(--text);
       line-height: 1;
       text-shadow: 0 0 40px rgba(88,166,255,.25);
       transition: color .1s;
     }
-    #clock.flash { color: #58a6ff; }
+    #clock.flash { color: var(--accent); }
 
     #next-pip {
       margin-top: 6px;
       font-size: 1.15rem;
-      color: #8b949e;
+      color: var(--muted);
       min-height: 1.6rem;
     }
-    #next-pip span { color: #58a6ff; font-weight: 700; }
+    #next-pip span { color: var(--accent); font-weight: 700; }
 
     #progress-track {
       width: min(700px, 90vw);
       height: 8px;
-      background: #21262d;
+      background: var(--border);
       border-radius: 99px;
       margin-top: 10px;
       overflow: hidden;
@@ -153,16 +153,16 @@
     #btn-stop   { background: #da3633; color: #fff; display: none; }
     #btn-stop:hover  { filter: brightness(1.15); }
 
-    #btn-reset  { background: #21262d; color: #e6edf3; border: 2px solid #30363d; }
-    #btn-reset:hover { border-color: #58a6ff; }
+    #btn-reset  { background: var(--surface); color: var(--text); border: 2px solid var(--border); }
+    #btn-reset:hover { border-color: var(--accent); }
 
     #btn-export {
-      background: #21262d;
-      color: #3fb950;
-      border: 2px solid #3fb950;
+      background: var(--surface);
+      color: var(--green);
+      border: 2px solid var(--green);
       display: none;
     }
-    #btn-export:hover { background: #3fb950; color: #0d1117; }
+    #btn-export:hover { background: var(--green); color: var(--bg); }
 
     /* ── PIPS LOG ── */
     #pips-section {
@@ -175,18 +175,18 @@
     }
     #pips-section::-webkit-scrollbar { width: 6px; }
     #pips-section::-webkit-scrollbar-track { background: transparent; }
-    #pips-section::-webkit-scrollbar-thumb { background: #30363d; border-radius: 99px; }
+    #pips-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
 
-    thead tr { background: #21262d; position: sticky; top: 0; z-index: 1; }
+    thead tr { background: var(--surface); position: sticky; top: 0; z-index: 1; }
 
     th, td { padding: 10px 20px; text-align: left; }
-    th { color: #8b949e; font-weight: 600; font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
+    th { color: var(--muted); font-weight: 600; font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
 
-    tbody tr { border-top: 1px solid #21262d; }
+    tbody tr { border-top: 1px solid var(--border); }
 
-    .pip-num  { color: #58a6ff; font-weight: 800; font-size: 1.2rem; width: 90px; }
+    .pip-num  { color: var(--accent); font-weight: 800; font-size: 1.2rem; width: 90px; }
     .pip-time { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 1.1rem; width: 110px; }
     .pip-laps { width: 100%; }
 
@@ -196,17 +196,17 @@
       font-size: 1.1rem;
       font-weight: 600;
       font-variant-numeric: tabular-nums;
-      background: #0d1117;
-      border: 2px solid #30363d;
+      background: var(--bg);
+      border: 2px solid var(--border);
       border-radius: 8px;
-      color: #e6edf3;
+      color: var(--text);
       outline: none;
       transition: border-color .2s, background .2s;
       user-select: text;
       -webkit-user-select: text;
     }
-    .laps-input:focus { border-color: #58a6ff; background: #161b22; }
-    .laps-input::placeholder { color: #484f58; font-weight: 400; }
+    .laps-input:focus { border-color: var(--accent); background: var(--surface); }
+    .laps-input::placeholder { color: var(--muted); font-weight: 400; }
 
     @keyframes flash-row {
       0%   { background: rgba(88,166,255,.3); }
@@ -214,7 +214,7 @@
     }
     .new-pip { animation: flash-row .9s ease-out forwards; }
 
-    #empty-msg { text-align: center; color: #484f58; padding: 30px; font-size: 1rem; }
+    #empty-msg { text-align: center; color: var(--muted); padding: 30px; font-size: 1rem; }
   </style>
 </head>
 <body>

@@ -33,22 +33,20 @@
       --red:     #cf222e;
     }
     #theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
-      background: var(--surface, #161b22);
-      border: 1px solid var(--border, #30363d);
+      background: var(--surface2);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 5px 12px;
       cursor: pointer;
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--muted, #8b949e);
+      color: var(--muted);
       transition: border-color .2s, color .2s;
       user-select: none;
+      flex-shrink: 0;
+      margin-left: 12px;
     }
-    #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
+    #theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
     html, body { height: 100%; overflow: hidden; }
 
@@ -441,6 +439,7 @@
     <span><kbd>C</kbd> Clear</span>
     <span><kbd>E</kbd> Export CSV</span>
   </div>
+  <button id="theme-toggle">☀</button>
 </header>
 
 <main>
@@ -956,7 +955,6 @@ renderAllGates();
 renderDerived();
 renderTrials();
 </script>
-<button id="theme-toggle">☀</button>
 <script>
 (function(){
   const btn = document.getElementById('theme-toggle');

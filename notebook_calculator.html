@@ -26,22 +26,19 @@ body.light {
   --calc-bg: #eef2f7;
 }
 #theme-toggle {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 9999;
-  background: var(--surface, #161b22);
-  border: 1px solid var(--border, #30363d);
+  background: none;
+  border: 1px solid transparent;
   border-radius: 20px;
-  padding: 5px 12px;
+  padding: 3px 10px;
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--muted, #8b949e);
+  color: var(--muted);
   transition: border-color .2s, color .2s;
   user-select: none;
+  flex-shrink: 0;
 }
-#theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
+#theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
 html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--bg); }
 body { display: flex; }
@@ -167,6 +164,8 @@ body { display: flex; }
     <button class="tb-btn" id="btn-undo"  title="Undo (Ctrl+Z)">↩</button>
     <button class="tb-btn" id="btn-clear" title="Clear">🗑</button>
     <button class="tb-btn" id="btn-save"  title="Save PNG">💾</button>
+    <div class="nb-sep"></div>
+    <button id="theme-toggle">☀</button>
   </div>
   <div id="canvas-wrap">
     <canvas id="grid-canvas"></canvas>
@@ -276,16 +275,19 @@ function resizeCv() {
 
 function drawGrid() {
   const W = gridCv.width, H = gridCv.height;
-  gCtx.fillStyle = '#fdfeff';
+  const dark = document.body.classList.contains('light') === false;
+  gCtx.fillStyle = dark ? '#0f1923' : '#fdfeff';
   gCtx.fillRect(0, 0, W, H);
   // minor
-  gCtx.strokeStyle = 'rgba(80,120,200,0.10)'; gCtx.lineWidth = 0.5;
+  gCtx.strokeStyle = dark ? 'rgba(100,160,255,0.08)' : 'rgba(80,120,200,0.10)';
+  gCtx.lineWidth = 0.5;
   gCtx.beginPath();
   for (let x = 0; x <= W; x += CELL) { gCtx.moveTo(x, 0); gCtx.lineTo(x, H); }
   for (let y = 0; y <= H; y += CELL) { gCtx.moveTo(0, y); gCtx.lineTo(W, y); }
   gCtx.stroke();
   // major
-  gCtx.strokeStyle = 'rgba(80,120,200,0.24)'; gCtx.lineWidth = 0.9;
+  gCtx.strokeStyle = dark ? 'rgba(100,160,255,0.20)' : 'rgba(80,120,200,0.24)';
+  gCtx.lineWidth = 0.9;
   gCtx.beginPath();
   for (let x = 0; x <= W; x += CELL * MAJOR) { gCtx.moveTo(x, 0); gCtx.lineTo(x, H); }
   for (let y = 0; y <= H; y += CELL * MAJOR) { gCtx.moveTo(0, y); gCtx.lineTo(W, y); }
@@ -522,7 +524,6 @@ document.addEventListener('keydown', e => {
   }
 });
 </script>
-<button id="theme-toggle">☀</button>
 <script>
 (function(){
   const btn = document.getElementById('theme-toggle');
@@ -532,6 +533,7 @@ document.addEventListener('keydown', e => {
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    drawGrid(); redrawPaths();
   });
 })();
 </script>

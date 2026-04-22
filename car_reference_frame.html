@@ -10,30 +10,46 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:       #0d1117;
-    --bg2:      #161b22;
-    --border:   #30363d;
-    --amber:    #58a6ff;
-    --blue:     #58a6ff;
-    --green:    #3fb950;
-    --red:      #f85149;
-    --red-light:#ff7b72;
-    --text:     #e6edf3;
-    --dim:      #8b949e;
-    --mark:     #58a6ff;
+    --bg:            #0d1117;
+    --bg2:           #161b22;
+    --border:        #30363d;
+    --amber:         #58a6ff;
+    --blue:          #58a6ff;
+    --green:         #3fb950;
+    --red:           #f85149;
+    --red-light:     #ff7b72;
+    --text:          #e6edf3;
+    --dim:           #8b949e;
+    --mark:          #58a6ff;
+    --bg-accent:     #1a2030;
+    --bg-accent-hov: #232d40;
+    --chip-green-bg: #1a3028;
+    --chip-red-bg:   #30181a;
+    --arrow-label-bg: rgba(15,22,35,0.92);
+    --arrow-label-bg2: rgba(15,22,35,0.96);
+    --arrow-label-border: rgba(80,120,180,0.55);
+    --arrow-label-text: #e6edf3;
   }
   body.light {
-    --bg:       #e8f0f8;
-    --bg2:      #d8e8f5;
-    --border:   #9ab8d8;
-    --amber:    #1858a8;
-    --blue:     #4090d0;
-    --green:    #1a8050;
-    --red:      #c02818;
-    --red-light:#e06858;
-    --text:     #102040;
-    --dim:      #4870a8;
-    --mark:     #1880b0;
+    --bg:            #e8f0f8;
+    --bg2:           #d8e8f5;
+    --border:        #9ab8d8;
+    --amber:         #1858a8;
+    --blue:          #4090d0;
+    --green:         #1a8050;
+    --red:           #c02818;
+    --red-light:     #e06858;
+    --text:          #102040;
+    --dim:           #4870a8;
+    --mark:          #1880b0;
+    --bg-accent:     #eaf2ff;
+    --bg-accent-hov: #daeaff;
+    --chip-green-bg: #e0f4ec;
+    --chip-red-bg:   #fceee8;
+    --arrow-label-bg: rgba(232,242,255,0.92);
+    --arrow-label-bg2: rgba(232,242,255,0.96);
+    --arrow-label-border: rgba(100,140,200,0.55);
+    --arrow-label-text: #2a2420;
   }
   #theme-toggle {
     position: fixed;
@@ -85,12 +101,12 @@
     -webkit-tap-highlight-color: transparent;
   }
   #left-controls button:last-child { border-right: none; }
-  #left-controls button:hover { background: #e8e4dc; }
+  #left-controls button:hover { background: var(--bg-accent-hov); }
   #btn-play {
     color: var(--amber) !important; font-weight: 600 !important;
-    background: #eaf2ff !important;
+    background: var(--bg-accent) !important;
   }
-  #btn-play:hover { background: #daeaff !important; }
+  #btn-play:hover { background: var(--bg-accent-hov) !important; }
 
   #status-bar {
     font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -117,7 +133,7 @@
 
   /* Readouts */
   #readouts {
-    flex-shrink: 0; background: #f0f6ff;
+    flex-shrink: 0; background: var(--bg2);
     border-bottom: 1px solid var(--border);
     display: flex;
   }
@@ -161,7 +177,7 @@
   }
   .unit-btn:first-child { border-radius: 2px 0 0 2px; border-right: none; }
   .unit-btn:last-child  { border-radius: 0 2px 2px 0; }
-  .unit-btn.active { background: #eaf2ff; color: var(--amber); font-weight: 600; }
+  .unit-btn.active { background: var(--bg-accent); color: var(--amber); font-weight: 600; }
   .unit-btn:disabled { opacity: 0.40; cursor: default; }
 
   /* Physics symbol — keeps lower-case despite parent text-transform */
@@ -200,7 +216,7 @@
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
     background: var(--amber); cursor: pointer;
-    box-shadow: 0 0 0 2px #eaf2ff, 0 0 0 3px var(--amber);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--amber);
   }
   input[type=range]::-moz-range-thumb {
     width: 13px; height: 13px; border-radius: 50%;
@@ -249,7 +265,7 @@
     background: var(--bg2);
   }
   .sign-table td {
-    padding: 5px 6px; border-bottom: 1px solid #ebe7e0; line-height: 1.4;
+    padding: 5px 6px; border-bottom: 1px solid var(--border); line-height: 1.4;
   }
   .sign-table td:first-child { color: var(--text); font-weight: 600; }
 </style>
@@ -718,7 +734,8 @@ function drawArrows(W, H, vMs, aMs2) {
     ctx.font = '600 15px "JetBrains Mono", monospace';
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     const tw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(232,242,255,0.92)';
+    const isLight = document.body.classList.contains('light');
+    ctx.fillStyle = isLight ? 'rgba(232,242,255,0.92)' : 'rgba(15,22,35,0.92)';
     ctx.beginPath();
     ctx.roundRect(labelX - tw/2 - 6, labelY - 16, tw + 12, 22, 3);
     ctx.fill();
@@ -744,15 +761,15 @@ function drawArrows(W, H, vMs, aMs2) {
     ctx.font = '600 15px "JetBrains Mono", monospace';
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     const tw = ctx.measureText(label).width;
+    const isLight = document.body.classList.contains('light');
     // pill background with border
-    ctx.fillStyle = 'rgba(232,242,255,0.96)';
+    ctx.fillStyle = isLight ? 'rgba(232,242,255,0.96)' : 'rgba(15,22,35,0.96)';
     ctx.beginPath();
     ctx.roundRect(cx - tw/2 - 8, aArrowY - 22, tw + 16, 26, 4);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(100,140,200,0.55)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = isLight ? 'rgba(100,140,200,0.55)' : 'rgba(80,120,180,0.55)'; ctx.lineWidth = 1;
     ctx.stroke();
-    // dark readable text
-    ctx.fillStyle = '#2a2420';
+    ctx.fillStyle = isLight ? '#2a2420' : '#e6edf3';
     ctx.fillText(label, cx, aArrowY - 3);
     ctx.restore();
   }
@@ -885,7 +902,7 @@ function updateReadouts() {
   const spdup = (v > 0.1 && acc > 0.01) || (v < -0.1 && acc < -0.01);
   const sldwn = (v > 0.1 && acc < -0.01) || (v < -0.1 && acc > 0.01);
   chip.textContent      = spdup ? 'speeding up' : sldwn ? 'slowing down' : 'constant';
-  chip.style.background = spdup ? '#e0f4ec' : sldwn ? '#fceee8' : 'var(--bg2)';
+  chip.style.background = spdup ? 'var(--chip-green-bg)' : sldwn ? 'var(--chip-red-bg)' : 'var(--bg2)';
   chip.style.color      = spdup ? 'var(--green)' : sldwn ? 'var(--red)' : 'var(--dim)';
 }
 

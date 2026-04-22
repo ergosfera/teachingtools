@@ -10,18 +10,28 @@
   :root {
     --bg: #0d1117;
     --surface: #161b22;
+    --surface2: #1c2128;
     --border: #30363d;
     --text: #e6edf3;
     --muted: #8b949e;
     --accent: #58a6ff;
+    --input-focus-bg: rgba(88,166,255,0.08);
+    --input-hover-bg: rgba(88,166,255,0.05);
+    --row-even-bg: rgba(255,255,255,0.03);
+    --toggle-active-bg: rgba(88,166,255,0.12);
   }
   body.light {
     --bg: #ecf0f1;
     --surface: #ffffff;
+    --surface2: #f8f9fa;
     --border: #dde3e9;
     --text: #2c3e50;
     --muted: #95a5a6;
     --accent: #2980b9;
+    --input-focus-bg: #eaf4fb;
+    --input-hover-bg: #f0f7fe;
+    --row-even-bg: #f8f9fa;
+    --toggle-active-bg: #eaf4fb;
   }
   #theme-toggle {
     position: fixed;
@@ -81,7 +91,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #95a5a6;
+    color: var(--muted);
     margin-bottom: 4px;
   }
 
@@ -90,7 +100,7 @@
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
-    color: #bbb;
+    color: var(--muted);
   }
 
   /* Table */
@@ -123,16 +133,16 @@
 
   #data-table thead th.del-th { width: 24px; background: #2c3e50; }
 
-  #data-table tbody tr:nth-child(even) { background: #f8f9fa; }
+  #data-table tbody tr:nth-child(even) { background: var(--row-even-bg); }
 
   #data-table tbody td {
     padding: 2px 3px;
-    border-bottom: 1px solid #eaecee;
+    border-bottom: 1px solid var(--border);
   }
 
-  #data-table tbody td:first-child { border-right: 1px solid #eaecee; }
+  #data-table tbody td:first-child { border-right: 1px solid var(--border); }
 
-  .del-cell { width: 24px; text-align: center; border-left: 1px solid #eaecee; }
+  .del-cell { width: 24px; text-align: center; border-left: 1px solid var(--border); }
 
   #data-table tbody td input {
     width: 100%;
@@ -142,17 +152,17 @@
     font-size: 0.92em;
     text-align: right;
     background: transparent;
-    color: #2c3e50;
+    color: var(--text);
     font-family: 'Courier New', monospace;
   }
 
   #data-table tbody td input:focus {
     outline: none;
-    border-color: #3498db;
-    background: #eaf4fb;
+    border-color: var(--accent);
+    background: var(--input-focus-bg);
   }
 
-  #data-table tbody tr:hover td input { background: #f0f7fe; }
+  #data-table tbody tr:hover td input { background: var(--input-hover-bg); }
 
   .del-btn {
     background: none;
@@ -178,10 +188,10 @@
   .add-row-btn {
     flex: 1;
     padding: 6px;
-    background: #f8f9fa;
-    border: 1px dashed #bbb;
+    background: var(--surface2);
+    border: 1px dashed var(--border);
     border-radius: 6px;
-    color: #888;
+    color: var(--muted);
     font-size: 0.82em;
     cursor: pointer;
     text-align: center;
@@ -192,7 +202,7 @@
 
   .table-hint {
     font-size: 0.68em;
-    color: #bbb;
+    color: var(--muted);
     margin-top: 5px;
     font-family: 'Courier New', monospace;
     letter-spacing: 0.01em;
@@ -205,10 +215,10 @@
 
   .csv-btn {
     padding: 6px 9px;
-    background: #f8f9fa;
-    border: 1px dashed #bbb;
+    background: var(--surface2);
+    border: 1px dashed var(--border);
     border-radius: 6px;
-    color: #888;
+    color: var(--muted);
     font-size: 0.82em;
     cursor: pointer;
     white-space: nowrap;
@@ -224,7 +234,7 @@
 
   .units-row label {
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text);
     min-width: 28px;
     font-family: 'Courier New', monospace;
     font-size: 0.95em;
@@ -232,18 +242,18 @@
 
   .unit-input {
     flex: 1;
-    border: 1px solid #dde3e9;
+    border: 1px solid var(--border);
     border-radius: 4px;
     padding: 4px 7px;
     font-size: 0.9em;
-    color: #2c3e50;
-    background: #f8f9fa;
+    color: var(--text);
+    background: var(--surface2);
     outline: none;
     min-width: 0;
     transition: border-color 0.12s, background 0.12s;
   }
 
-  .unit-input:focus { border-color: #3498db; background: #eaf4fb; }
+  .unit-input:focus { border-color: var(--accent); background: var(--input-focus-bg); }
 
   /* Toggle boxes (origin, pan) */
   .toggle-box {
@@ -251,8 +261,8 @@
     align-items: center;
     gap: 8px;
     padding: 10px;
-    background: #f8f9fa;
-    border: 1px solid #dde3e9;
+    background: var(--surface2);
+    border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.83em;
     cursor: pointer;
@@ -260,11 +270,11 @@
     transition: background 0.12s, border-color 0.12s;
   }
 
-  .toggle-box:hover { background: #f0f4f8; }
+  .toggle-box:hover { background: var(--input-hover-bg); }
 
   .toggle-box.active {
-    background: #eaf4fb;
-    border-color: #2980b9;
+    background: var(--toggle-active-bg);
+    border-color: var(--accent);
   }
 
   .toggle-box input[type="checkbox"] {
@@ -278,7 +288,7 @@
   /* Reset view link */
   .reset-view {
     font-size: 0.75em;
-    color: #aaa;
+    color: var(--muted);
     cursor: pointer;
     text-align: right;
     margin-top: 2px;
@@ -286,12 +296,12 @@
     transition: color 0.12s;
   }
 
-  .reset-view:hover { color: #2980b9; }
+  .reset-view:hover { color: var(--accent); }
 
   /* Coefficients & Residuals */
   .coeff-box {
-    background: #f8f9fa;
-    border: 1px solid #dde3e9;
+    background: var(--surface2);
+    border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
   }
@@ -304,10 +314,10 @@
     font-size: 0.88em;
   }
 
-  .coeff-row:not(:last-child) { border-bottom: 1px solid #eaecee; }
+  .coeff-row:not(:last-child) { border-bottom: 1px solid var(--border); }
 
-  .coeff-name { font-weight: 600; color: #555; }
-  .coeff-desc { font-size: 0.78em; color: #999; margin-left: 2px; }
+  .coeff-name { font-weight: 600; color: var(--text); }
+  .coeff-desc { font-size: 0.78em; color: var(--muted); margin-left: 2px; }
 
   .coeff-val {
     font-family: 'Courier New', monospace;
@@ -341,8 +351,8 @@
 
   #clear-btn, #export-btn {
     padding: 11px 9px;
-    background: #ecf0f1;
-    border: 1px solid #bdc3c7;
+    background: var(--surface2);
+    border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.9em;
     font-weight: 700;
@@ -351,7 +361,7 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
 
-  #clear-btn  { color: #7f8c8d; }
+  #clear-btn  { color: var(--muted); }
   #export-btn { color: #27ae60; }
 
   #clear-btn:hover  { background: #fdecea; color: #e74c3c; border-color: #e74c3c; }
@@ -371,7 +381,7 @@
     display: block;
     border-radius: 6px;
     box-shadow: 0 3px 16px rgba(0,0,0,0.13);
-    background: #fff;
+    background: var(--surface2);
     max-width: 100%;
     max-height: 100%;
   }
@@ -432,7 +442,7 @@
         </label>
         <label class="toggle-box" id="pan-box">
           <input type="checkbox" id="pan-mode-chk">
-          <span>🖐 Pan mode — drag to move the view <kbd style="font-size:0.8em;background:#dde3e9;border-radius:3px;padding:1px 4px;font-family:monospace;color:#555">P</kbd></span>
+          <span>🖐 Pan mode — drag to move the view <kbd style="font-size:0.8em;background:var(--border);border-radius:3px;padding:1px 4px;font-family:monospace;color:var(--text)">P</kbd></span>
         </label>
         <div class="reset-view" id="reset-view">Reset view</div>
       </div>
@@ -854,23 +864,26 @@ function trimNum(v) {
   return parseFloat(v.toPrecision(4)).toString();
 }
 
+function isDark() { return !document.body.classList.contains('light'); }
+
 function drawGrid(s) {
   ctx.save();
+  const dark = isDark();
 
-  // White background for PNG export
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = dark ? '#0d1117' : '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#fdfdfd';
+  ctx.fillStyle = dark ? '#1c2128' : '#fdfdfd';
   ctx.fillRect(MARGIN.left, MARGIN.top, s.W, s.H);
 
   const xStep = niceStep(s.xMax - s.xMin, 7);
   const yStep = niceStep(s.yMax - s.yMin, 7);
 
   ctx.font = '11px "Segoe UI", Tahoma, sans-serif';
-  ctx.strokeStyle = '#e2e6ea'; ctx.lineWidth = 1;
+  ctx.strokeStyle = dark ? '#21262d' : '#e2e6ea'; ctx.lineWidth = 1;
 
-  ctx.textAlign = 'center'; ctx.fillStyle = '#999';
+  const tickColor = dark ? '#8b949e' : '#999';
+  ctx.textAlign = 'center'; ctx.fillStyle = tickColor;
   for (let x = Math.ceil(s.xMin / xStep) * xStep; x <= s.xMax + 1e-9; x += xStep) {
     const cx = s.cx(x);
     ctx.beginPath(); ctx.moveTo(cx, MARGIN.top); ctx.lineTo(cx, MARGIN.top + s.H); ctx.stroke();
@@ -884,7 +897,7 @@ function drawGrid(s) {
     ctx.fillText(trimNum(y), MARGIN.left - 6, cy + 4);
   }
 
-  ctx.strokeStyle = '#aab'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = dark ? '#484f58' : '#aab'; ctx.lineWidth = 1.5;
   if (s.xMin <= 0 && 0 <= s.xMax) {
     const cx = s.cx(0);
     ctx.beginPath(); ctx.moveTo(cx, MARGIN.top); ctx.lineTo(cx, MARGIN.top + s.H); ctx.stroke();
@@ -894,7 +907,7 @@ function drawGrid(s) {
     ctx.beginPath(); ctx.moveTo(MARGIN.left, cy); ctx.lineTo(MARGIN.left + s.W, cy); ctx.stroke();
   }
 
-  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+  ctx.strokeStyle = dark ? '#30363d' : '#ccc'; ctx.lineWidth = 1;
   ctx.strokeRect(MARGIN.left, MARGIN.top, s.W, s.H);
   ctx.restore();
 }
@@ -950,10 +963,10 @@ function drawEquation(s) {
   const tw = ctx.measureText(eq).width;
   const px = MARGIN.left + s.W - 10, py = MARGIN.top + 24, pad = 7;
 
-  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fillStyle = isDark() ? 'rgba(22,27,34,0.95)' : 'rgba(255,255,255,0.92)';
   ctx.beginPath(); ctx.roundRect(px - tw - pad * 2, py - 15, tw + pad * 2 + 2, 22, 5); ctx.fill();
   ctx.strokeStyle = 'rgba(231,76,60,0.35)'; ctx.lineWidth = 1; ctx.stroke();
-  ctx.fillStyle = '#c0392b'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = isDark() ? '#ff7b72' : '#c0392b'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
   ctx.fillText(eq, px, py);
   ctx.restore();
 }
@@ -983,7 +996,7 @@ function drawAxisLabels() {
   const cy = MARGIN.top  + scale.H / 2;
 
   ctx.font = 'bold 13px "Segoe UI", Tahoma, sans-serif';
-  ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = isDark() ? '#8b949e' : '#555'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.fillText(getAxisLabel('x'), cx, canvas.height - 10);
 
   ctx.save();

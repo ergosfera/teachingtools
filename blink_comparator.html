@@ -67,19 +67,19 @@
       padding: 3px 0;
     }
 
-    .sep { width: 1px; height: 16px; background: #444; margin: 0 4px; }
+    .sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
 
     button {
       padding: 3px 9px;
-      background: #2c2c2c;
-      border: 1px solid #484848;
-      color: #ccc;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
       border-radius: 4px;
       cursor: pointer;
       font-size: 11px;
       white-space: nowrap;
     }
-    button:hover:not(:disabled) { background: #3a3a3a; border-color: #666; }
+    button:hover:not(:disabled) { filter: brightness(1.15); border-color: var(--muted); }
     button:disabled { opacity: 0.35; cursor: default; }
 
     #btn-blink {
@@ -94,26 +94,26 @@
     #btn-blink.stop { background: #7f0000; border-color: #b71c1c; color: #ef9a9a; }
 
     .badge {
-      background: #2c2c2c;
-      border: 1px solid #444;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 1px 8px;
       font-size: 11px;
-      color: #888;
+      color: var(--muted);
     }
 
-    label { color: #999; font-size: 11px; }
+    label { color: var(--muted); font-size: 11px; }
 
     input[type=range] {
       width: 120px;
-      accent-color: #4fc3f7;
+      accent-color: var(--accent);
       cursor: pointer;
     }
     input[type=number] {
       width: 42px;
-      background: #2c2c2c;
-      border: 1px solid #484848;
-      color: #ccc;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
       border-radius: 3px;
       padding: 2px 4px;
       font-size: 11px;
@@ -122,7 +122,7 @@
 
     #status-bar {
       font-size: 11px;
-      color: #888;
+      color: var(--muted);
       padding: 2px 0;
       min-height: 18px;
     }
@@ -138,8 +138,9 @@
       height: 100%;
     }
 
-    .lbl-val { color: #4fc3f7; min-width: 30px; }
-    .lbl-off { color: #4fc3f7; }
+    .lbl-val { color: var(--accent); min-width: 30px; }
+    .lbl-off { color: var(--accent); }
+    #lbl1, #lbl2 { color: var(--muted); }
   </style>
 </head>
 <body>

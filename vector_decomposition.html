@@ -14,6 +14,12 @@
       --text: #e6edf3;
       --muted: #8b949e;
       --accent: #58a6ff;
+      --canvas-bg1: #161b22;
+      --canvas-bg2: #0d1117;
+      --grid-color:  #21272e;
+      --axis-color:  #7788bb;
+      --axis-label:  #5588dd;
+      --tag-bg:      rgba(22,27,34,0.95);
     }
     body.light {
       --bg: #eef0f6;
@@ -22,6 +28,12 @@
       --text: #334;
       --muted: #8899aa;
       --accent: #4455aa;
+      --canvas-bg1: #f9fafd;
+      --canvas-bg2: #f2f4fa;
+      --grid-color:  #dde2ec;
+      --axis-color:  #2a2a44;
+      --axis-label:  #4455aa;
+      --tag-bg:      rgba(255,255,255,0.95);
     }
     #theme-toggle {
       position: fixed;
@@ -48,7 +60,7 @@
       align-items: center;
       padding: 16px 14px 28px;
       font-family: 'Segoe UI', system-ui, sans-serif;
-      color: #334;
+      color: var(--text);
       user-select: none;
       min-height: 100vh;
     }
@@ -56,14 +68,14 @@
       font-size: 1.12rem;
       font-weight: 700;
       letter-spacing: 1.5px;
-      color: #223355;
+      color: var(--text);
       margin-bottom: 2px;
       text-transform: uppercase;
       text-align: center;
     }
     p.sub {
       font-size: 0.75rem;
-      color: #8899aa;
+      color: var(--muted);
       margin-bottom: 10px;
       text-align: center;
     }
@@ -79,7 +91,7 @@
       gap: 7px;
       margin-top: 10px;
       font-size: 0.85rem;
-      color: #445;
+      color: var(--text);
     }
     #mag-row label { font-weight: 600; color: #e03000; }
     #mag-in {
@@ -119,10 +131,10 @@
     #btn-dash { background: #e8a800; color: #fff; }
     #btn-comp { background: #0088bb; color: #fff; }
     #btn-tri  { background: #7755cc; color: #fff; }
-    #btn-reset { background: #ccd0dd; color: #445; border: 1px solid #bbc; }
+    #btn-reset { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
     .hint {
       font-size: 0.72rem;
-      color: #8899aa;
+      color: var(--muted);
       margin-top: 8px;
       text-align: center;
       line-height: 1.85;
@@ -167,12 +179,14 @@ const PX_N    = 35;    // pixels per Newton (used for grid/ticks only)
 const AXIS    = 245;   // half-axis length px
 const VIS_LEN = 160;   // fixed visual arrow length px (decoupled from magnitude)
 
+// ─── Theme helper ──────────────────────────────────────────────────────────────
+function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
+
 // ─── Colours ───────────────────────────────────────────────────────────────────
 const COL = {
-  bg:   '#f7f8fc',
-  grid: '#dde2ec',
-  axis: '#2a2a44',
-  albl: '#4455aa',
+  get grid() { return cssVar('--grid-color'); },
+  get axis() { return cssVar('--axis-color'); },
+  get albl() { return cssVar('--axis-label'); },
   hdl:  '#4466dd',
   vec:  '#e03000',
   xc:   '#0088bb',
@@ -280,7 +294,7 @@ function placeTag(key, text, nx, ny, col) {
   const bw=tw+px*2, bh=th+py*2;
   const bx=fx-bw/2, by=fy-bh/2;
 
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fillStyle = cssVar('--tag-bg');
   rr(bx,by,bw,bh,5); ctx.fill();
 
   const active = dragTag === key;
@@ -308,7 +322,7 @@ function rightAngleMark(px,py,d1,d2,sz) {
 // ─── Scene ─────────────────────────────────────────────────────────────────────
 function drawBg() {
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#f9fafd'); g.addColorStop(1,'#f2f4fa');
+  g.addColorStop(0, cssVar('--canvas-bg1')); g.addColorStop(1, cssVar('--canvas-bg2'));
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 }
 
@@ -347,7 +361,7 @@ function drawAxes() {
   ctx.restore();
 
   // Origin
-  ctx.save(); ctx.fillStyle='#556';
+  ctx.save(); ctx.fillStyle=COL.axis;
   ctx.beginPath(); ctx.arc(OX,OY,4,0,Math.PI*2); ctx.fill();
   ctx.restore();
 
@@ -656,11 +670,12 @@ draw();
 (function(){
   const btn = document.getElementById('theme-toggle');
   const saved = localStorage.getItem('theme');
-  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; draw(); }
   btn.addEventListener('click', () => {
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    draw();
   });
 })();
 </script>

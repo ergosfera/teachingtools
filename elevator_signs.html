@@ -10,32 +10,36 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:     #0d1117;
-    --bg2:    #161b22;
-    --border: #30363d;
-    --amber:  #58a6ff;
-    --blue:   #58a6ff;
-    --green:  #3fb950;
-    --red:    #f85149;
-    --red-light:#ff7b72;
-    --text:   #e6edf3;
-    --dim:    #8b949e;
-    --mark:   #58a6ff;
-    --orange: #d29922;
+    --bg:         #0d1117;
+    --bg2:        #161b22;
+    --border:     #30363d;
+    --amber:      #58a6ff;
+    --blue:       #58a6ff;
+    --green:      #3fb950;
+    --red:        #f85149;
+    --red-light:  #ff7b72;
+    --text:       #e6edf3;
+    --dim:        #8b949e;
+    --mark:       #58a6ff;
+    --orange:     #d29922;
+    --hover-bg:   #1d2535;
+    --btn-play-bg:#1a2535;
   }
   body.light {
-    --bg:     #e8f0f8;
-    --bg2:    #d8e8f5;
-    --border: #9ab8d8;
-    --amber:  #1858a8;
-    --blue:   #4090d0;
-    --green:  #1a8050;
-    --red:    #c02818;
-    --red-light:#e06858;
-    --text:   #102040;
-    --dim:    #4870a8;
-    --mark:   #1880b0;
-    --orange: #c07020;
+    --bg:         #e8f0f8;
+    --bg2:        #d8e8f5;
+    --border:     #9ab8d8;
+    --amber:      #1858a8;
+    --blue:       #4090d0;
+    --green:      #1a8050;
+    --red:        #c02818;
+    --red-light:  #e06858;
+    --text:       #102040;
+    --dim:        #4870a8;
+    --mark:       #1880b0;
+    --orange:     #c07020;
+    --hover-bg:   #c8daf0;
+    --btn-play-bg:#eaf2ff;
   }
   #theme-toggle {
     position: fixed;
@@ -87,12 +91,12 @@
     -webkit-tap-highlight-color: transparent;
   }
   #left-controls button:last-child { border-right: none; }
-  #left-controls button:hover { background: #c8daf0; }
+  #left-controls button:hover { background: var(--hover-bg); }
   #btn-play {
     color: var(--amber) !important; font-weight: 600 !important;
-    background: #eaf2ff !important;
+    background: var(--btn-play-bg) !important;
   }
-  #btn-play:hover { background: #daeaff !important; }
+  #btn-play:hover { background: var(--hover-bg) !important; }
 
   #status-bar {
     font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -119,7 +123,7 @@
 
   /* Readouts */
   #readouts {
-    flex-shrink: 0; background: #f0f6ff;
+    flex-shrink: 0; background: var(--bg2);
     border-bottom: 1px solid var(--border);
     display: flex;
   }
@@ -159,7 +163,7 @@
   }
   .unit-btn:first-child { border-radius: 2px 0 0 2px; border-right: none; }
   .unit-btn:last-child  { border-radius: 0 2px 2px 0; }
-  .unit-btn.active { background: #eaf2ff; color: var(--amber); font-weight: 600; }
+  .unit-btn.active { background: var(--btn-play-bg); color: var(--amber); font-weight: 600; }
   .unit-btn:disabled { opacity: 0.40; cursor: default; }
 
   /* Controls */
@@ -184,7 +188,7 @@
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
     background: var(--amber); cursor: pointer;
-    box-shadow: 0 0 0 2px #eaf2ff, 0 0 0 3px var(--amber);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--amber);
   }
   input[type=range]::-moz-range-thumb {
     width: 13px; height: 13px; border-radius: 50%;
@@ -235,7 +239,7 @@
     color: var(--dim); font-weight: 400; text-align: left;
     padding: 4px 6px; border-bottom: 1px solid var(--border); background: var(--bg2);
   }
-  .sign-table td { padding: 5px 6px; border-bottom: 1px solid #c8daf0; line-height: 1.4; }
+  .sign-table td { padding: 5px 6px; border-bottom: 1px solid var(--border); line-height: 1.4; }
   .sign-table td:first-child { color: var(--text); font-weight: 600; }
 </style>
 </head>
@@ -396,25 +400,63 @@ const WIN_COLS_L = 4, WIN_COLS_R = 4;
 const floorTint = Array.from({ length: 200 }, () => RNG.next() * 0.15);
 
 // ── Palette ───────────────────────────────────────────────────
-const C = {
-  bldg:     '#1a2638',   // building exterior wall
-  bldgLine: '#243048',   // floor divider lines
-  winLit:   'rgba(200,220,255,0.22)',
-  winDark:  'rgba(100,130,180,0.08)',
-  shaft:    '#0e151e',
-  shaftWall:'#16202c',
-  rail:     '#2a3a50',
-  railHigh: '#3a5070',
-  floorLine:'rgba(80,120,170,0.55)',
-  floorTxt: '#4878a8',
-  cabinBase:'#222a36',
-  cabinMid: '#2e3a4c',
-  cabinHigh:'#384858',
-  cabinDoor:'#0a0e16',
-  cabinTrim:'rgba(160,190,230,0.20)',
-  ledGreen: '#30d060',
-  cable:    '#283848',
+const C_dark = {
+  bldg:          '#1a2638',
+  bldgLine:      '#243048',
+  winLit:        'rgba(200,220,255,0.22)',
+  winDark:       'rgba(100,130,180,0.08)',
+  winBorder:     'rgba(50,80,120,0.30)',
+  shaft:         '#0e151e',
+  shaftWall:     '#16202c',
+  shaftEdge:     '#111820',
+  rail:          '#2a3a50',
+  railHigh:      '#3a5070',
+  floorLine:     'rgba(80,120,170,0.55)',
+  floorTxt:      '#4878a8',
+  cabinBase:     '#222a36',
+  cabinMid:      '#2e3a4c',
+  cabinHigh:     '#384858',
+  cabinEdge:     '#1c2430',
+  cabinDoor:     '#0a0e16',
+  cabinTrim:     'rgba(160,190,230,0.20)',
+  cabinSill:     '#181e28',
+  cabinIndicator:'#080c12',
+  cabinHandle:   '#606880',
+  cabinEmerg:    '#1a0e10',
+  cabinGrill:    '#2a3444',
+  cabinBracket:  '#1a2230',
+  ledGreen:      '#30d060',
+  cable:         '#283848',
 };
+const C_light = {
+  bldg:          '#bfccd8',
+  bldgLine:      '#9eb0c0',
+  winLit:        'rgba(160,200,240,0.68)',
+  winDark:       'rgba(130,165,200,0.38)',
+  winBorder:     'rgba(60,90,140,0.38)',
+  shaft:         '#b8c5d0',
+  shaftWall:     '#a8b5c2',
+  shaftEdge:     '#98a8b8',
+  rail:          '#6888a0',
+  railHigh:      '#4870a0',
+  floorLine:     'rgba(50,80,130,0.48)',
+  floorTxt:      '#2858a0',
+  cabinBase:     '#7888a0',
+  cabinMid:      '#8898b0',
+  cabinHigh:     '#98a8c0',
+  cabinEdge:     '#5878a0',
+  cabinDoor:     '#3a5070',
+  cabinTrim:     'rgba(20,50,110,0.22)',
+  cabinSill:     '#4a6078',
+  cabinIndicator:'#283040',
+  cabinHandle:   '#8898a8',
+  cabinEmerg:    '#503040',
+  cabinGrill:    '#5878a0',
+  cabinBracket:  '#4a6078',
+  ledGreen:      '#18a030',
+  cable:         '#4870a0',
+};
+let C = C_dark;
 
 // ── Unit-aware velocity display ───────────────────────────────
 function fmtV(vMs) {
@@ -461,14 +503,14 @@ function drawExterior() {
       const wx = sl * 0.06 + c * (winW + sl * 0.04);
       ctx.fillStyle = wColor;
       ctx.fillRect(wx, winY, winW, winH);
-      ctx.strokeStyle = 'rgba(50,80,120,0.3)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = C.winBorder; ctx.lineWidth = 0.5;
       ctx.strokeRect(wx, winY, winW, winH);
     }
     for (let c = 0; c < WIN_COLS_R; c++) {
       const wx = sr + (W - sr) * 0.06 + c * (winW + (W - sr) * 0.04);
       ctx.fillStyle = wColor;
       ctx.fillRect(wx, winY, winW, winH);
-      ctx.strokeStyle = 'rgba(50,80,120,0.3)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = C.winBorder; ctx.lineWidth = 0.5;
       ctx.strokeRect(wx, winY, winW, winH);
     }
   }
@@ -486,7 +528,7 @@ function drawShaft() {
   // Inner wall panels
   const panelW = sw * 0.06;
   const wallGrad = ctx.createLinearGradient(sl, 0, sl + panelW * 2, 0);
-  wallGrad.addColorStop(0, '#111820');
+  wallGrad.addColorStop(0, C.shaftEdge);
   wallGrad.addColorStop(0.4, C.shaftWall);
   wallGrad.addColorStop(1, C.shaft);
   ctx.fillStyle = wallGrad;
@@ -570,12 +612,12 @@ function drawCabin() {
 
   // Body gradient (brushed steel)
   const bg = ctx.createLinearGradient(L, 0, L + cabW, 0);
-  bg.addColorStop(0,    '#1c2430');
-  bg.addColorStop(0.08, '#2e3a4e');
+  bg.addColorStop(0,    C.cabinEdge);
+  bg.addColorStop(0.08, C.cabinMid);
   bg.addColorStop(0.48, C.cabinMid);
   bg.addColorStop(0.52, C.cabinMid);
-  bg.addColorStop(0.92, '#2e3a4e');
-  bg.addColorStop(1,    '#1c2430');
+  bg.addColorStop(0.92, C.cabinMid);
+  bg.addColorStop(1,    C.cabinEdge);
   ctx.fillStyle = bg;
   ctx.beginPath(); ctx.roundRect(L, T, cabW, cabH, 3); ctx.fill();
 
@@ -584,7 +626,7 @@ function drawCabin() {
   ctx.fillRect(L, T, cabW, cabH * 0.04);
 
   // Bottom sill
-  ctx.fillStyle = '#181e28';
+  ctx.fillStyle = C.cabinSill;
   ctx.fillRect(L, T + cabH - cabH * 0.06, cabW, cabH * 0.06);
 
   // Center door gap
@@ -602,7 +644,7 @@ function drawCabin() {
   });
 
   // Door handles
-  ctx.fillStyle = '#606880';
+  ctx.fillStyle = C.cabinHandle;
   const hW = cabW * 0.06, hH = cabH * 0.008;
   ctx.fillRect(cx - cabW * 0.16 - hW / 2, cy - hH / 2, hW, hH);
   ctx.fillRect(cx + cabW * 0.16 - hW / 2, cy - hH / 2, hW, hH);
@@ -610,7 +652,7 @@ function drawCabin() {
   // Floor indicator display (top center)
   const indW = cabW * 0.28, indH = cabH * 0.10;
   const indX = cx - indW / 2, indY = T + cabH * 0.07;
-  ctx.fillStyle = '#080c12';
+  ctx.fillStyle = C.cabinIndicator;
   ctx.beginPath(); ctx.roundRect(indX, indY, indW, indH, 2); ctx.fill();
   ctx.strokeStyle = 'rgba(80,110,160,0.5)'; ctx.lineWidth = 0.8; ctx.stroke();
 
@@ -624,7 +666,7 @@ function drawCabin() {
   // Emergency panel (small red square, right door)
   const panW = cabW * 0.06, panH = cabH * 0.18;
   const panX = cx + cabW * 0.30, panY = cy - panH / 2;
-  ctx.fillStyle = '#1a0e10';
+  ctx.fillStyle = C.cabinEmerg;
   ctx.fillRect(panX, panY, panW, panH);
   // Emergency button
   ctx.beginPath();
@@ -632,7 +674,7 @@ function drawCabin() {
   ctx.fillStyle = '#c02010'; ctx.fill();
   // Speaker grill (left door, tiny dots)
   const grillX = cx - cabW * 0.36, grillY = cy - cabH * 0.06;
-  ctx.fillStyle = '#2a3444';
+  ctx.fillStyle = C.cabinGrill;
   for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) {
     ctx.beginPath();
     ctx.arc(grillX + c * cabW * 0.025, grillY + r * cabH * 0.04, 1, 0, Math.PI * 2);
@@ -641,7 +683,7 @@ function drawCabin() {
 
   // Top mounting bracket
   const brW = cabW * 0.28, brH = cabH * 0.055;
-  ctx.fillStyle = '#1a2230';
+  ctx.fillStyle = C.cabinBracket;
   ctx.fillRect(cx - brW / 2, T - brH, brW, brH);
   ctx.strokeStyle = 'rgba(80,110,160,0.4)'; ctx.lineWidth = 0.7;
   ctx.strokeRect(cx - brW / 2, T - brH, brW, brH);
@@ -658,12 +700,23 @@ function drawArrows(vMs, aMs2) {
   const vLen   = Math.min(Math.abs(vKmh) / 120 * MAX_PX, MAX_PX);
   const aLen   = Math.min(Math.abs(aMs2) / 9.8 * MAX_PX * 0.78, MAX_PX * 0.78);
 
-  // +1 = up (tip toward screen top = smaller Y), -1 = down
   const vDir = vMs < 0 ? -1 : 1;
   const aDir = aMs2 < 0 ? -1 : 1;
 
-  const vColor = vMs < 0 ? '#4090d0' : '#1858a8';
-  const aColor = aMs2 < 0 ? '#e06858' : aMs2 > 0 ? '#c02818' : '#4870a8';
+  const cs = getComputedStyle(document.documentElement);
+  const varAmber    = cs.getPropertyValue('--amber').trim();
+  const varBlue     = cs.getPropertyValue('--blue').trim();
+  const varRed      = cs.getPropertyValue('--red').trim();
+  const varRedLight = cs.getPropertyValue('--red-light').trim();
+  const varDim      = cs.getPropertyValue('--dim').trim();
+  const varText     = cs.getPropertyValue('--text').trim();
+
+  const vColor = vMs < 0 ? varBlue : varAmber;
+  const aColor = aMs2 < 0 ? varRedLight : aMs2 > 0 ? varRed : varDim;
+
+  const isLight  = document.body.classList.contains('light');
+  const labelBg  = isLight ? 'rgba(255,255,255,0.94)' : 'rgba(232,242,255,0.92)';
+  const labelStr = isLight ? 'rgba(50,100,180,0.60)'  : 'rgba(100,140,200,0.40)';
 
   function drawVArrow(x, baseY, len, dir, color, label) {
     ctx.save();
@@ -684,26 +737,23 @@ function drawArrows(vMs, aMs2) {
       ctx.closePath(); ctx.fillStyle = color; ctx.fill();
     }
 
-    // Label to the right at mid-shaft height
     const labelY = len < 3 ? baseY : baseY - dir * Math.max(len * 0.5, HL);
     const labelX = x + 14;
     ctx.font = '600 14px "JetBrains Mono", monospace';
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     const tw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(232,242,255,0.92)';
+    ctx.fillStyle = labelBg;
     ctx.beginPath(); ctx.roundRect(labelX - 4, labelY - 11, tw + 10, 22, 3); ctx.fill();
-    ctx.strokeStyle = 'rgba(100,140,200,0.40)'; ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.strokeStyle = labelStr; ctx.lineWidth = 0.8; ctx.stroke();
     ctx.fillStyle = color;
     ctx.fillText(label, labelX, labelY);
 
     ctx.restore();
   }
 
-  // v arrow
   const { num: vNum, lbl: vUnitLbl } = fmtV(vMs);
   drawVArrow(vx, cy, vLen, vDir, vColor, 'v = ' + vNum + ' ' + vUnitLbl.replace(' / ', '/'));
 
-  // a arrow
   if (Math.abs(aMs2) > 0.01) {
     const aSign  = aMs2 > 0 ? '+' : '';
     drawVArrow(ax, cy, aLen, aDir, aColor, 'a = ' + aSign + aMs2.toFixed(1) + ' m/s²');
@@ -713,16 +763,17 @@ function drawArrows(vMs, aMs2) {
     ctx.font = '600 14px "JetBrains Mono", monospace';
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     const tw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(232,242,255,0.96)';
+    ctx.fillStyle = labelBg;
     ctx.beginPath(); ctx.roundRect(ax - 4, cy - 13, tw + 10, 26, 4); ctx.fill();
-    ctx.strokeStyle = 'rgba(100,140,200,0.55)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = '#102040'; ctx.fillText(label, ax, cy);
+    ctx.strokeStyle = labelStr; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = varText; ctx.fillText(label, ax, cy);
     ctx.restore();
   }
 }
 
 // ── Full render ───────────────────────────────────────────────
 function render() {
+  C = document.body.classList.contains('light') ? C_light : C_dark;
   const W = canvas.width, H = canvas.height;
 
   // Clear
@@ -895,6 +946,7 @@ render();
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    if (!running) render();
   });
 })();
 </script>

@@ -15,6 +15,8 @@
   --bg:      #0d1117;
   --green:   #3fb950;
   --red:     #f85149;
+  --purple:  #a78bfa;
+  --orange:  #fb923c;
 }
 body.light {
   --border:  #c8d4e0;
@@ -25,10 +27,12 @@ body.light {
   --bg:      #f0f4f8;
   --green:   #16a34a;
   --red:     #dc2626;
+  --purple:  #7c3aed;
+  --orange:  #ea580c;
 }
 #theme-toggle {
   position: fixed;
-  top: 10px;
+  bottom: 10px;
   right: 10px;
   z-index: 9999;
   background: var(--surface, #161b22);
@@ -44,25 +48,55 @@ body.light {
 }
 #theme-toggle:hover { border-color: var(--accent, #58a6ff); color: var(--accent, #58a6ff); }
 html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--bg); }
-body { display: flex; }
+body { display: flex; flex-direction: column; }
+
+/* ── Top bar ── */
+#top-bar {
+  flex-shrink: 0; height: 38px;
+  display: flex; align-items: center; padding: 0 16px; gap: 10px;
+  background: var(--surface); border-bottom: 2px solid var(--border);
+}
+#top-bar h1 {
+  font-size: 0.95rem; font-weight: 800; color: var(--text);
+  letter-spacing: .03em; white-space: nowrap;
+}
+.step-flow {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.7rem; color: var(--muted); flex: 1;
+}
+.step-chip {
+  padding: 2px 8px; border-radius: 20px; font-weight: 700;
+  font-size: 0.65rem; letter-spacing: .04em; white-space: nowrap;
+}
+.step-chip.c1 { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.step-chip.c2 { background: color-mix(in srgb, var(--purple) 15%, transparent); color: var(--purple); }
+.step-chip.c3 { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
+.step-chip.c4 { background: color-mix(in srgb, var(--orange) 15%, transparent); color: var(--orange); }
+.step-arrow { color: var(--muted); font-size: 0.7rem; }
+
+#panels-row { flex: 1; display: flex; min-height: 0; overflow: hidden; }
 
 /* ── Panels ── */
 .panel {
-  width: 25%; height: 100vh;
+  width: 25%; height: 100%;
   display: flex; flex-direction: column;
   border-right: 1px solid var(--border);
   background: var(--surface);
   overflow: hidden;
 }
 .panel-header {
-  flex-shrink: 0; padding: 8px 12px;
+  flex-shrink: 0; padding: 9px 12px;
   background: var(--surface); border-bottom: 2px solid var(--border);
   display: flex; align-items: center; gap: 8px;
+  border-top: 3px solid var(--panel-color, var(--accent));
 }
 .panel-title {
-  font-size: 0.72rem; font-weight: 700; color: var(--muted);
-  letter-spacing: .09em; text-transform: uppercase; flex: 1;
+  font-size: 0.78rem; font-weight: 800; color: var(--panel-color, var(--accent));
+  letter-spacing: .05em; text-transform: uppercase; flex: 1;
 }
+.panel.p1 { --panel-color: var(--accent); }
+.panel.p2 { --panel-color: var(--purple); }
+.panel.p3 { --panel-color: var(--green); }
 .panel-footer {
   flex-shrink: 0; padding: 7px 10px; border-top: 1px solid var(--border);
   display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
@@ -82,27 +116,27 @@ thead th {
 }
 thead th:first-child { text-align: center; width: 30px; }
 tbody td {
-  padding: 5px 7px; border-bottom: 1px solid #eef2f6;
+  padding: 5px 7px; border-bottom: 1px solid var(--border);
   font-family: 'Courier New', monospace; font-size: 0.85rem;
-  text-align: right;
+  text-align: right; color: var(--text);
 }
 tbody td:first-child { text-align: center; color: var(--muted); font-size: 0.7rem; }
-tbody tr:hover { background: #f0f6ff; }
+tbody tr:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .td-del { width: 26px; padding: 2px 3px !important; }
 .btn-del {
   background: none; border: none; color: #ccc; cursor: pointer;
   font-size: 0.85rem; padding: 2px 5px; border-radius: 3px; line-height: 1;
 }
-.btn-del:hover { color: var(--red); background: #fee2e2; }
+.btn-del:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
 
 input.cell-in {
   width: 100%; background: transparent; border: none; outline: none;
   font-family: 'Courier New', monospace; font-size: 0.85rem;
   color: var(--text); text-align: right; padding: 0;
 }
-input.cell-in:focus { background: #eff8ff; border-radius: 3px; padding: 0 3px; }
-input.cell-in.err { color: var(--red); background: #fee2e2; border-radius: 3px; }
-.cell-dt { color: #7c3aed; }
+input.cell-in:focus { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 3px; padding: 0 3px; }
+input.cell-in.err { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); border-radius: 3px; }
+.cell-dt { color: var(--purple); }
 .cell-dx { color: var(--accent); }
 .cell-tm { color: var(--muted); }
 .cell-v  { color: var(--green); font-weight: 700; }
@@ -117,13 +151,14 @@ input.cell-in.err { color: var(--red); background: #fee2e2; border-radius: 3px; 
   transition: background .12s, color .12s, border-color .12s;
   white-space: nowrap;
 }
-.btn:hover { background: #e4edf8; color: var(--accent); border-color: var(--accent); }
+.btn:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); border-color: var(--accent); }
 
 /* ── Graph panel ── */
 #graph-panel {
-  width: 25%; height: 100vh;
+  width: 25%; height: 100%;
   display: flex; flex-direction: column;
   background: var(--bg); border-left: none;
+  --panel-color: var(--orange);
 }
 .graph-half {
   flex: 1; min-height: 0;
@@ -135,9 +170,11 @@ input.cell-in.err { color: var(--red); background: #fee2e2; border-radius: 3px; 
   border-bottom: 1px solid var(--border); background: var(--surface);
   display: flex; align-items: center; gap: 8px;
 }
+.graph-half:first-child .graph-header { border-top: 3px solid var(--panel-color, var(--orange)); }
+.graph-half + .graph-half .graph-header { border-top: 2px solid var(--border); }
 .graph-title {
-  font-size: 0.72rem; font-weight: 700; color: var(--muted);
-  letter-spacing: .09em; text-transform: uppercase; flex: 1;
+  font-size: 0.78rem; font-weight: 800; color: var(--panel-color, var(--orange));
+  letter-spacing: .05em; text-transform: uppercase; flex: 1;
 }
 #fit-info, #fit-info-xt {
   font-size: 0.7rem; color: var(--green);
@@ -155,7 +192,7 @@ input.cell-in.err { color: var(--red); background: #fee2e2; border-radius: 3px; 
 canvas.chart { display: block; width: 100%; height: 100%; }
 
 /* ── CSV hint ── */
-.hint { font-size: 0.63rem; color: #bbb; font-family: 'Courier New', monospace; margin-left: auto; }
+.hint { font-size: 0.63rem; color: var(--muted); font-family: 'Courier New', monospace; margin-left: auto; }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -163,10 +200,25 @@ canvas.chart { display: block; width: 100%; height: 100%; }
 </head>
 <body>
 
+<div id="top-bar">
+  <h1>⚡ Instantaneous Velocity</h1>
+  <div class="step-flow">
+    <span class="step-chip c1">① Record data</span>
+    <span class="step-arrow">→</span>
+    <span class="step-chip c2">② Differences</span>
+    <span class="step-arrow">→</span>
+    <span class="step-chip c3">③ Velocity</span>
+    <span class="step-arrow">→</span>
+    <span class="step-chip c4">④ Graphs</span>
+  </div>
+</div>
+
+<div id="panels-row">
+
 <!-- Panel 1 — raw data (t, x) -->
-<div class="panel">
+<div class="panel p1">
   <div class="panel-header">
-    <span class="panel-title">Position vs Time</span>
+    <span class="panel-title">📍 Position vs Time</span>
     <span class="hint">CSV: col1 = t, col2 = x</span>
     <label class="btn" title="Import CSV">
       📂
@@ -193,9 +245,9 @@ canvas.chart { display: block; width: 100%; height: 100%; }
 </div>
 
 <!-- Panel 2 — differences -->
-<div class="panel">
+<div class="panel p2">
   <div class="panel-header">
-    <span class="panel-title">Differences</span>
+    <span class="panel-title">📐 Differences</span>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -212,9 +264,9 @@ canvas.chart { display: block; width: 100%; height: 100%; }
 </div>
 
 <!-- Panel 3 — velocity -->
-<div class="panel">
+<div class="panel p3">
   <div class="panel-header">
-    <span class="panel-title">Velocity</span>
+    <span class="panel-title">🚀 Velocity</span>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -235,7 +287,7 @@ canvas.chart { display: block; width: 100%; height: 100%; }
   <!-- x vs t -->
   <div class="graph-half">
     <div class="graph-header">
-      <span class="graph-title">x vs t</span>
+      <span class="graph-title">📈 x vs t</span>
       <label class="fit-label">
         <input type="checkbox" id="fit-toggle-xt"> best fit
       </label>
@@ -248,7 +300,7 @@ canvas.chart { display: block; width: 100%; height: 100%; }
   <!-- v vs t -->
   <div class="graph-half">
     <div class="graph-header">
-      <span class="graph-title">v vs t</span>
+      <span class="graph-title">🚀 v vs t</span>
       <label class="fit-label">
         <input type="checkbox" id="fit-toggle"> best fit
       </label>
@@ -429,13 +481,17 @@ function niceAxis(vals) {
   };
 }
 
+function cssVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
 function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   const dpr = window.devicePixelRatio || 1;
   const ctx = cv.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const W = cv.width / dpr, H = cv.height / dpr;
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = cssVar('--surface');
   ctx.fillRect(0, 0, W, H);
 
   const pad = { l: 52, r: 14, t: 14, b: 40 };
@@ -443,7 +499,7 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   const ph = H - pad.t - pad.b;
 
   if (!xs.length) {
-    ctx.fillStyle = '#bbb';
+    ctx.fillStyle = cssVar('--muted');
     ctx.font = '12px Segoe UI';
     ctx.textAlign = 'center';
     ctx.fillText('No data yet', W / 2, H / 2);
@@ -455,7 +511,7 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   const toY = v => pad.t + ph - (v - yR.min) / (yR.max - yR.min) * ph;
 
   // grid
-  ctx.strokeStyle = '#e8eef6'; ctx.lineWidth = 0.8;
+  ctx.strokeStyle = cssVar('--border'); ctx.lineWidth = 0.8;
   for (let v = xR.min; v <= xR.max + xR.step * 0.01; v += xR.step) {
     const px = toX(v);
     ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
@@ -466,14 +522,14 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   }
 
   // axes
-  ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = cssVar('--muted'); ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph);
   ctx.moveTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph);
   ctx.stroke();
 
   // tick labels
-  ctx.fillStyle = '#607080'; ctx.font = '10px Courier New';
+  ctx.fillStyle = cssVar('--muted'); ctx.font = '10px Courier New';
   ctx.textAlign = 'center';
   for (let v = xR.min; v <= xR.max + xR.step * 0.01; v += xR.step)
     ctx.fillText(parseFloat(v.toPrecision(4)), toX(v), pad.t + ph + 14);
@@ -482,7 +538,7 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
     ctx.fillText(parseFloat(v.toPrecision(4)), pad.l - 5, toY(v) + 4);
 
   // axis labels
-  ctx.fillStyle = '#1a2234'; ctx.font = 'bold 12px Segoe UI';
+  ctx.fillStyle = cssVar('--text'); ctx.font = 'bold 12px Segoe UI';
   ctx.textAlign = 'center';
   ctx.fillText(xLbl, pad.l + pw / 2, H - 6);
   ctx.save();
@@ -502,7 +558,7 @@ function drawChart(cv, xs, ys, xLbl, yLbl, ptColor, fitLine) {
   // best fit line (drawn on top of points)
   if (fitLine) {
     const { a, b } = fitLine;
-    ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
+    ctx.strokeStyle = cssVar('--green'); ctx.lineWidth = 2;
     ctx.setLineDash([5, 4]);
     ctx.beginPath();
     ctx.moveTo(toX(xR.min), toY(a * xR.min + b));
@@ -541,7 +597,7 @@ function drawCharts() {
     rawData.map(d => d.t),
     rawData.map(d => d.x),
     't', 'x',
-    '#1858a8',
+    cssVar('--accent'),
     fitXt
   );
 
@@ -561,7 +617,7 @@ function drawCharts() {
     vels.map(v => v.t),
     vels.map(v => v.v),
     't', 'v',
-    '#16a34a',
+    cssVar('--green'),
     fit
   );
 
@@ -587,6 +643,7 @@ window.addEventListener('resize', drawCharts);
 renderRaw();
 recompute();
 </script>
+</div><!-- /panels-row -->
 <button id="theme-toggle">☀</button>
 <script>
 (function(){
@@ -597,6 +654,7 @@ recompute();
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    drawCharts();
   });
 })();
 </script>

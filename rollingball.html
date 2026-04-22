@@ -19,6 +19,13 @@
     --amber:     #d29922;
     --text:      #e6edf3;
     --text-dim:  #8b949e;
+    --btn-start-bg:  #1e1a0e;
+    --btn-start-hov: #251f10;
+    --row-active-bg: #1e1a0e;
+    --graph-grid:    #21272e;
+    --graph-major:   #404850;
+    --graph-axis:    #606870;
+    --graph-label:   #8b949e;
   }
   body.light {
     --bg:        #f4f1ec;
@@ -30,6 +37,13 @@
     --amber:     #b07818;
     --text:      #2a2420;
     --text-dim:  #8a8278;
+    --btn-start-bg:  #fff8ee;
+    --btn-start-hov: #fff0d8;
+    --row-active-bg: #fff8ee;
+    --graph-grid:    #d8d4cc;
+    --graph-major:   #a8a49c;
+    --graph-axis:    #706c64;
+    --graph-label:   #8a8278;
   }
   #theme-toggle {
     position: fixed;
@@ -86,13 +100,13 @@
     transition: background 0.15s, color 0.15s;
   }
   #left-controls button:last-child { border-right: none; }
-  #left-controls button:hover { background: #e8e4dc; }
+  #left-controls button:hover { background: var(--border); }
   #btn-start {
     color: var(--amber) !important;
     font-weight: 600 !important;
-    background: #fff8ee !important;
+    background: var(--btn-start-bg) !important;
   }
-  #btn-start:hover { background: #fff0d8 !important; }
+  #btn-start:hover { background: var(--btn-start-hov) !important; }
   #btn-start:disabled { opacity: 0.38; cursor: default; }
   #status-bar {
     font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -127,7 +141,7 @@
     flex: 10;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: #fff;
+    background: var(--bg2);
     border-bottom: 1px solid var(--border);
     text-align: center;
   }
@@ -168,13 +182,13 @@
     text-align: left; background: var(--bg2);
     position: sticky; top: 0;
   }
-  tbody tr { border-bottom: 1px solid #e8e4dc; }
+  tbody tr { border-bottom: 1px solid var(--border); }
   tbody td {
     padding: 8px 10px; color: var(--text-dim);
     transition: color 0.3s, background 0.3s;
   }
   tbody tr.filled td { color: var(--text); }
-  tbody tr.active { background: #fff8ee; }
+  tbody tr.active { background: var(--row-active-bg); }
   tbody tr.filled td.mark-cell { color: var(--mark); font-weight: 600; }
   .dot {
     display: inline-block; width: 7px; height: 7px; border-radius: 50%;
@@ -280,6 +294,9 @@
 </div>
 
 <script>
+// ── Theme helper ─────────────────────────────────────────────────────────────
+function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
+
 // ── Physics ───────────────────────────────────────────────────────────────────
 const TRACK_LEN = 1.50;
 const DURATION  = 5.0;
@@ -339,7 +356,7 @@ function drawSim(elapsed) {
   const thick = 7;
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#f4f1ec'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = cssVar('--bg'); ctx.fillRect(0, 0, W, H);
 
   // Ramp body
   ctx.beginPath();
@@ -433,7 +450,7 @@ function drawGraph() {
   const W = gCanvas.width, H = gCanvas.height;
   if (W <= 0 || H <= 0) return;
   gCtx.clearRect(0, 0, W, H);
-  gCtx.fillStyle = '#edeae3'; gCtx.fillRect(0, 0, W, H);
+  gCtx.fillStyle = cssVar('--bg2'); gCtx.fillRect(0, 0, W, H);
 
   const padL = 36, padR = 8, padT = 8, padB = 22;
   const plotW = W - padL - padR;
@@ -444,7 +461,7 @@ function drawGraph() {
   function ty(x) { return padT + plotH - (x / xMax) * plotH; }
 
   // Minor grid — t every 0.1 s, x every 10 cm
-  gCtx.strokeStyle = '#b8b4aa'; gCtx.lineWidth = 0.8;
+  gCtx.strokeStyle = cssVar('--graph-grid'); gCtx.lineWidth = 0.8;
   for (let t = 0; t <= tMax + 0.001; t += 0.1) {
     gCtx.beginPath(); gCtx.moveTo(tx(t), padT); gCtx.lineTo(tx(t), padT + plotH); gCtx.stroke();
   }
@@ -453,7 +470,7 @@ function drawGraph() {
   }
 
   // Major grid — t every 1 s, x every 50 cm
-  gCtx.strokeStyle = '#7a7870'; gCtx.lineWidth = 1.5;
+  gCtx.strokeStyle = cssVar('--graph-major'); gCtx.lineWidth = 1.5;
   for (let t = 0; t <= tMax; t++) {
     gCtx.beginPath(); gCtx.moveTo(tx(t), padT); gCtx.lineTo(tx(t), padT + plotH); gCtx.stroke();
   }
@@ -462,14 +479,14 @@ function drawGraph() {
   }
 
   // Axes
-  gCtx.strokeStyle = '#3a3830'; gCtx.lineWidth = 1.8;
+  gCtx.strokeStyle = cssVar('--graph-axis'); gCtx.lineWidth = 1.8;
   gCtx.beginPath();
   gCtx.moveTo(padL, padT); gCtx.lineTo(padL, padT + plotH);
   gCtx.lineTo(padL + plotW, padT + plotH);
   gCtx.stroke();
 
   // Tick labels — lowercase
-  gCtx.fillStyle = '#4a4840'; gCtx.font = '9px JetBrains Mono, monospace';
+  gCtx.fillStyle = cssVar('--graph-label'); gCtx.font = '9px JetBrains Mono, monospace';
   gCtx.textAlign = 'center';
   for (let t = 0; t <= tMax; t++) gCtx.fillText(t, tx(t), padT + plotH + 11);
   gCtx.textAlign = 'right';
@@ -602,11 +619,13 @@ drawSim(0); drawGraph();
 (function(){
   const btn = document.getElementById('theme-toggle');
   const saved = localStorage.getItem('theme');
-  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; }
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '☽'; drawGraph(); drawSim(0); }
   btn.addEventListener('click', () => {
     const isLight = document.body.classList.toggle('light');
     btn.textContent = isLight ? '☽' : '☀';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    drawGraph();
+    if (!running) drawSim(0);
   });
 })();
 </script>
