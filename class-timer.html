@@ -45,6 +45,30 @@
       }
     }
 
+    :root.theme-light {
+      --bg:           #f1f5f9;
+      --surface:      #ffffff;
+      --surface-alt:  #f8fafc;
+      --border:       #e2e8f0;
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --subtle:       #94a3b8;
+      --shadow:       0 1px 4px rgba(0,0,0,.07), 0 0 1px rgba(0,0,0,.05);
+      --shadow-lg:    0 6px 24px rgba(0,0,0,.08), 0 0 1px rgba(0,0,0,.04);
+    }
+
+    :root.theme-dark {
+      --bg:          #0f172a;
+      --surface:     #1e293b;
+      --surface-alt: #293548;
+      --border:      #334155;
+      --text:        #f1f5f9;
+      --muted:       #94a3b8;
+      --subtle:      #64748b;
+      --shadow:      0 1px 4px rgba(0,0,0,.3), 0 0 1px rgba(0,0,0,.2);
+      --shadow-lg:   0 6px 24px rgba(0,0,0,.35), 0 0 1px rgba(0,0,0,.2);
+    }
+
     /* ---- Reset ---- */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -401,6 +425,49 @@
 
     .hidden { display: none !important; }
 
+    /* Toggle switch */
+    .toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .toggle-switch-slider {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      background: var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border: 1.5px solid var(--border);
+    }
+
+    .toggle-switch input:checked + .toggle-switch-slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle-switch-slider::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: var(--surface);
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-switch-slider::after {
+      left: 26px;
+    }
+
     /* Responsive */
     @media (max-width: 640px) {
       .grid2, .grid3          { grid-template-columns: 1fr; }
@@ -475,17 +542,26 @@
 
         <div class="divider"></div>
 
-        <!-- Mode selector -->
+        <!-- Mode and Theme selectors -->
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
-          <div class="section-label" style="margin:0;">Mode</div>
-          <div class="mode-toggle" role="group" aria-label="Timer mode">
-            <label class="mode-option">
-              <input type="radio" name="mode" id="modeDuration" value="duration" checked />
-              Duration
-            </label>
-            <label class="mode-option">
-              <input type="radio" name="mode" id="modeEndtime" value="endtime" />
-              End time
+          <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:200px;">
+            <div class="section-label" style="margin:0;">Mode</div>
+            <div class="mode-toggle" role="group" aria-label="Timer mode">
+              <label class="mode-option">
+                <input type="radio" name="mode" id="modeDuration" value="duration" checked />
+                Duration
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="mode" id="modeEndtime" value="endtime" />
+                End time
+              </label>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="section-label" style="margin:0;">Dark mode</div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="themeToggle" />
+              <span class="toggle-switch-slider"></span>
             </label>
           </div>
         </div>
@@ -571,10 +647,10 @@
     ];
 
     const LINE2_PRESETS = [
-      "Class 1",
-      "Class 2",
-      "Class 3",
-      "Class 4",
+      "7C",
+      "8C",
+      "9C",
+      "AP Physics 2",
       "Other",
     ];
 
@@ -601,6 +677,7 @@
           line1Other:   line1Other.value,
           line2Other:   line2Other.value,
           showClockInfo: showClockInfo.checked,
+          darkMode:     themeToggle.checked,
         }));
       } catch { /* storage unavailable */ }
     }
@@ -659,6 +736,7 @@
     const btnStop        = document.getElementById("stop");
     const btnSet         = document.getElementById("set");
     const btnTogglePresent = document.getElementById("togglePresent");
+    const themeToggle    = document.getElementById("themeToggle");
 
     // ---- Restore saved settings ----
     if (saved.mode === "endtime") modeEndtime.checked = true;
@@ -673,6 +751,7 @@
     if (saved.line1Other) line1Other.value = saved.line1Other;
     if (saved.line2Other) line2Other.value = saved.line2Other;
     if (saved.showClockInfo === false) showClockInfo.checked = false;
+    if (saved.darkMode === true) themeToggle.checked = true;
 
     // Radios are built after DOM insertion, grab them now
     let line1Radios = Array.from(document.querySelectorAll('input[name="line1Preset"]'));
@@ -784,6 +863,18 @@
       presentation = !!on;
       app.classList.toggle("presentation", presentation);
       btnTogglePresent.textContent = presentation ? "⛶ Controls" : "⛶ Presentation";
+    }
+
+    // ---- Theme ----
+    function applyTheme(isDark) {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add("theme-dark");
+        root.classList.remove("theme-light");
+      } else {
+        root.classList.remove("theme-dark");
+        root.classList.remove("theme-light");
+      }
     }
 
     // ---- Timer internals ----
@@ -994,6 +1085,12 @@
     modeDuration.addEventListener("change", onModeChange);
     modeEndtime.addEventListener("change",  onModeChange);
 
+    // ---- Theme ----
+    themeToggle.addEventListener("change", () => {
+      applyTheme(themeToggle.checked);
+      saveSettings();
+    });
+
     // ---- Threshold inputs (update cached vars on change, not every tick) ----
     elYellowPct.addEventListener("input", () => {
       yellowPct = clampPct(elYellowPct.value, 80);
@@ -1039,6 +1136,7 @@
     updateOtherVisibility();
     renderHeaderText();
     setLogoSrc("");
+    applyTheme(themeToggle.checked);
     updateUI();
   </script>
 </body>
